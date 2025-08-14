@@ -1,11 +1,11 @@
 import type { Appointment, Client, StaffMember, Service } from './types';
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
 
-export const mockAppointments: Appointment[] = [
-  { id: '1', clientName: 'John Doe', service: 'Classic Haircut', staff: 'Alex Johnson', startTime: new Date(new Date().setHours(10, 0, 0, 0)), endTime: new Date(new Date().setHours(10, 30, 0, 0)), status: 'Confirmed' },
-  { id: '2', clientName: 'Jane Smith', service: 'Beard Trim', staff: 'Maria Garcia', startTime: new Date(new Date().setHours(11, 0, 0, 0)), endTime: new Date(new Date().setHours(11, 20, 0, 0)), status: 'Confirmed' },
-  { id: '3', clientName: 'Mike Williams', service: 'Hot Towel Shave', staff: 'Alex Johnson', startTime: new Date(new Date().setHours(12, 30, 0, 0)), endTime: new Date(new Date().setHours(13, 15, 0, 0)), status: 'Confirmed' },
-  { id: '4', clientName: 'Sarah Brown', service: 'Coloring', staff: 'Chloe Davis', startTime: new Date(new Date().setHours(14, 0, 0, 0)), endTime: new Date(new Date().setHours(15, 0, 0, 0)), status: 'Completed' },
-];
+export async function getAppointments() {
+  const snapshot = await getDocs(collection(db, "appointments"));
+  return snapshot.docs.map(doc => doc.data());
+}
 
 export const mockClients: Client[] = [
   { id: '1', name: 'John Doe', email: 'john.doe@example.com', phone: '123-456-7890', lastAppointment: new Date('2024-05-15'), preferences: 'Likes a fade on the sides, but keep the top longer. Prefers using American Crew products.', pastServices: ['Classic Haircut', 'Beard Trim'] },
