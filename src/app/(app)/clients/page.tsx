@@ -12,6 +12,8 @@ import { format } from "date-fns";
 import { PlusCircle, Mail, Phone, Calendar } from "lucide-react";
 import React from "react";
 
+export const dynamic = "force-dynamic";
+
 export default function ClientsPage() {
   return (
     <div className="space-y-6">
