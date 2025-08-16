@@ -26,6 +26,8 @@ import { mockStaff } from "@/lib/data";
 import { CalendarDays, MoreHorizontal, PlusCircle } from "lucide-react";
 import { AddStaffDialog } from "./add-staff-dialog";
 
+export const dynamic = "force-dynamic";
+
 export default function StaffPage() {
   return (
     <div className="space-y-6">

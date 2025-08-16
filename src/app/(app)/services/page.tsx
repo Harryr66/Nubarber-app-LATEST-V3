@@ -27,6 +27,8 @@ import {
     DropdownMenuTrigger,
   } from "@/components/ui/dropdown-menu"
 
+export const dynamic = "force-dynamic";
+
 export default function ServicesPage() {
   const hasServices = mockServices.length > 0;
 
