@@ -1,4 +1,4 @@
-# **App Name**: BarberFlow
+# **App Name**: Nubarber
 
 ## Core Features:
 
