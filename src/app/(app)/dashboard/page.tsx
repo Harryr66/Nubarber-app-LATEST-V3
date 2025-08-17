@@ -8,6 +8,8 @@ import {
 import { DollarSign, CalendarDays, Users, Scissors, CalendarOff } from "lucide-react";
 import BookingsChart from "./bookings-chart";
 
+export const dynamic = "force-dynamic";
+
 const stats = [
     {
         icon: DollarSign,

@@ -12,6 +12,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { BookTimeOffDialog } from "./book-time-off-dialog";
 
+export const dynamic = "force-dynamic";
 
 export default function AppointmentsPage() {
   const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
