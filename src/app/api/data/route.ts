@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { getFirestore } from "firebase/firestore";
 import { app } from "../../../firebase"; // Adjust path if needed
