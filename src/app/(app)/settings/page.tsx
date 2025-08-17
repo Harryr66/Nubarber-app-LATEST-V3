@@ -15,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreditCard, Lightbulb, Link, Sun, Moon, Monitor, Rocket, CheckCircle2, Globe } from "lucide-react";
 import { useTheme } from "next-themes";
 
+export const dynamic = "force-dynamic";
+
 export default function SettingsPage() {
   const { setTheme } = useTheme();
 

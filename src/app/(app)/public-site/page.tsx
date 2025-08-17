@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Upload, X, Copy, Eye, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 
+export const dynamic = "force-dynamic";
+
 export default function PublicSitePage() {
   const businessName = "Harrys Barbers";
   const derivedUrl = businessName.toLowerCase().replace(/\s+/g, '');
