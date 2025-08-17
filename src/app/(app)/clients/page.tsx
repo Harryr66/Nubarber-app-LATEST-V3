@@ -7,14 +7,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { mockClients } from "@/lib/data";
+import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { PlusCircle, Mail, Phone, Calendar } from "lucide-react";
-import React from "react";
 
 export const dynamic = "force-dynamic";
 
 export default function ClientsPage() {
+  const [clients, setClients] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/data?type=clients")
+      .then(res => res.json())
+      .then(data => setClients(data));
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -25,7 +32,7 @@ export default function ClientsPage() {
         </Button>
       </div>
       <div className="space-y-4">
-        {mockClients.map((client) => (
+        {clients.map((client) => (
           <Card key={client.id}>
             <CardHeader>
               <div className="flex justify-between items-start">
