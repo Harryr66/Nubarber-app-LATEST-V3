@@ -13,7 +13,7 @@ export type Client = {
   name: string;
   email: string;
   phone: string;
-  lastAppointment: Date;
+  lastAppointment: string;
   preferences: string;
   pastServices: string[];
 };

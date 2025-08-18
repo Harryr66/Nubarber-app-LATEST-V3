@@ -9,19 +9,31 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { PlusCircle, Mail, Phone, Calendar } from "lucide-react";
+import type { Client } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 export default function ClientsPage() {
-  const [clients, setClients] = useState([]);
+  const [clients, setClients] = useState<Client[]>([]);
 
   useEffect(() => {
     fetch("/api/data?type=clients")
       .then(res => res.json())
       .then(data => setClients(data));
   }, []);
+
+  const formatDate = (dateString: string) => {
+    try {
+      // Parse the date string and format it
+      const date = parseISO(dateString);
+      return format(date, "PPP");
+    } catch (error) {
+      // If date parsing fails, return the original string
+      return dateString;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -55,7 +67,7 @@ export default function ClientsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span>Last visit: {format(client.lastAppointment, "PPP")}</span>
+                    <span>Last visit: {formatDate(client.lastAppointment)}</span>
                   </div>
                </div>
             </CardContent>
