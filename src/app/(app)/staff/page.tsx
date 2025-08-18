@@ -80,7 +80,6 @@ export default function StaffPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Member</TableHead>
-                <TableHead>Specialty</TableHead>
                 <TableHead>Availability</TableHead>
                 <TableHead>
                   <span className="sr-only">Actions</span>
@@ -103,7 +102,7 @@ export default function StaffPage() {
                       <span className="font-medium">{staffMember.name}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{staffMember.specialty}</TableCell>
+                  <TableCell>{staffMember.availability}</TableCell>
                   <TableCell>
                     <Button variant="outline" size="sm">
                       <CalendarDays className="mr-2 h-4 w-4" />

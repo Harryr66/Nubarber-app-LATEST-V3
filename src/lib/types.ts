@@ -21,7 +21,6 @@ export type Client = {
 export type StaffMember = {
   id: string;
   name: string;
-  specialty: string;
   availability: string;
   avatarUrl: string;
 };

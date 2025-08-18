@@ -53,21 +53,18 @@ export async function GET(request: Request) {
       {
         id: "1",
         name: "Alex Johnson",
-        specialty: "Fades & Classic Cuts",
         availability: "Mon-Fri, 9am-5pm",
         avatarUrl: "https://placehold.co/100x100.png"
       },
       {
         id: "2",
         name: "Maria Garcia",
-        specialty: "Beard Sculpting & Styling",
         availability: "Tue-Sat, 10am-6pm",
         avatarUrl: "https://placehold.co/100x100.png"
       },
       {
         id: "3",
         name: "Chloe Davis",
-        specialty: "Color & Modern Styles",
         availability: "Wed-Sun, 11am-7pm",
         avatarUrl: "https://placehold.co/100x100.png"
       }
