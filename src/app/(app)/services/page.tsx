@@ -17,8 +17,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { MoreHorizontal, PlusCircle } from "lucide-react";
-import { AddServiceDialog } from "./add-service-dialog";
-import { mockServices } from "@/lib/data";
+import { AddServiceDialog } from "@/components/add-service-dialog";
+import { useEffect, useState } from "react";
+import type { Service } from "@/lib/types";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -30,20 +31,47 @@ import {
 export const dynamic = "force-dynamic";
 
 export default function ServicesPage() {
-  const hasServices = mockServices.length > 0;
+  const [services, setServices] = useState<Service[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/data?type=services")
+      .then(res => res.json())
+      .then(data => {
+        setServices(data);
+        setIsLoading(false);
+      })
+      .catch(error => {
+        console.error("Error fetching services:", error);
+        setIsLoading(false);
+      });
+  }, []);
+
+  const handleServiceAdded = (newService: Service) => {
+    setServices(prev => [newService, ...prev]);
+  };
+
+  const hasServices = services.length > 0;
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold font-headline">Services</h1>
+          <AddServiceDialog onServiceAdded={handleServiceAdded} />
+        </div>
+        <div className="flex items-center justify-center py-20">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold font-headline">Services</h1>
-        <AddServiceDialog 
-            trigger={
-                <Button>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Add New Service
-                </Button>
-            }
-        />
+        <AddServiceDialog onServiceAdded={handleServiceAdded} />
       </div>
       <Card>
         <CardHeader>
@@ -58,6 +86,7 @@ export default function ServicesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
+                  <TableHead>Category</TableHead>
                   <TableHead>Duration</TableHead>
                   <TableHead>Price</TableHead>
                   <TableHead>
@@ -66,9 +95,14 @@ export default function ServicesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockServices.map((service) => (
+                {services.map((service) => (
                   <TableRow key={service.id}>
                     <TableCell className="font-medium">{service.name}</TableCell>
+                    <TableCell>
+                      <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+                        {service.category}
+                      </span>
+                    </TableCell>
                     <TableCell>{service.duration} min</TableCell>
                     <TableCell>${service.price.toFixed(2)}</TableCell>
                     <TableCell>
@@ -96,14 +130,7 @@ export default function ServicesPage() {
               <p className="text-muted-foreground mt-1 mb-4">
                 Get started by adding your first service.
               </p>
-               <AddServiceDialog 
-                    trigger={
-                        <Button>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Add Service
-                        </Button>
-                    }
-                />
+               <AddServiceDialog onServiceAdded={handleServiceAdded} />
             </div>
           )}
         </CardContent>

@@ -7,11 +7,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { format, parseISO } from "date-fns";
-import { PlusCircle, Mail, Phone, Calendar } from "lucide-react";
+import { Mail, Phone, Calendar } from "lucide-react";
 import type { Client } from "@/lib/types";
+import { AddClientDialog } from "@/components/add-client-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -35,14 +35,15 @@ export default function ClientsPage() {
     }
   };
 
+  const handleClientAdded = (newClient: Client) => {
+    setClients(prev => [newClient, ...prev]);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold font-headline">Clients</h1>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Client
-        </Button>
+        <AddClientDialog onClientAdded={handleClientAdded} />
       </div>
       <div className="space-y-4">
         {clients.map((client) => (

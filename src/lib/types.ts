@@ -32,4 +32,5 @@ export type Service = {
   duration: number; // in minutes
   price: number;
   description: string;
+  category: string;
 };
