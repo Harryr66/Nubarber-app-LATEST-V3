@@ -13,9 +13,17 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PlusCircle, Upload, X } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { PlusCircle, Upload, X, Clock } from "lucide-react";
 import type { StaffMember } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+interface DaySchedule {
+  day: string;
+  enabled: boolean;
+  startTime: string;
+  endTime: string;
+}
 
 interface AddStaffDialogProps {
   onStaffAdded: (staff: StaffMember) => void;
@@ -26,17 +34,41 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    availability: "",
-    avatarUrl: ""
+    availability: ""
   });
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  
+  const [schedule, setSchedule] = useState<DaySchedule[]>([
+    { day: "Monday", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Tuesday", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Wednesday", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Thursday", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Friday", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Saturday", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Sunday", enabled: false, startTime: "09:00", endTime: "17:00" }
+  ]);
+
+  const [defaultStartTime, setDefaultStartTime] = useState("09:00");
+  const [defaultEndTime, setDefaultEndTime] = useState("17:00");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      // Format availability string from schedule
+      const enabledDays = schedule.filter(day => day.enabled);
+      if (enabledDays.length === 0) {
+        alert("Please select at least one working day");
+        setIsLoading(false);
+        return;
+      }
+
+      const availabilityString = enabledDays.map(day => 
+        `${day.day}: ${day.startTime}-${day.endTime}`
+      ).join(", ");
+
       // In a real app, you'd upload the image to Firebase Storage here
       // For now, we'll use a placeholder or the preview URL
       let finalAvatarUrl = "https://placehold.co/100x100.png";
@@ -50,7 +82,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
       const newStaff: StaffMember = {
         id: Date.now().toString(), // Simple ID generation
         name: formData.name,
-        availability: formData.availability,
+        availability: availabilityString,
         avatarUrl: finalAvatarUrl
       };
 
@@ -61,11 +93,11 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
       // Reset form and close dialog
       setFormData({
         name: "",
-        availability: "",
-        avatarUrl: ""
+        availability: ""
       });
       setProfileImage(null);
       setPreviewUrl("");
+      setSchedule(schedule.map(day => ({ ...day, enabled: false })));
       setOpen(false);
     } catch (error) {
       console.error("Error adding staff member:", error);
@@ -98,6 +130,34 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
     }
   };
 
+  const toggleDay = (dayIndex: number) => {
+    setSchedule(prev => prev.map((day, index) => 
+      index === dayIndex ? { ...day, enabled: !day.enabled } : day
+    ));
+  };
+
+  const updateDayTime = (dayIndex: number, field: 'startTime' | 'endTime', value: string) => {
+    setSchedule(prev => prev.map((day, index) => 
+      index === dayIndex ? { ...day, [field]: value } : day
+    ));
+  };
+
+  const applyToAll = () => {
+    setSchedule(prev => prev.map(day => ({
+      ...day,
+      startTime: defaultStartTime,
+      endTime: defaultEndTime
+    })));
+  };
+
+  const selectAllDays = () => {
+    setSchedule(prev => prev.map(day => ({ ...day, enabled: true })));
+  };
+
+  const clearAllDays = () => {
+    setSchedule(prev => prev.map(day => ({ ...day, enabled: false })));
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -106,7 +166,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
           Add Staff
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Add New Staff Member</DialogTitle>
           <DialogDescription>
@@ -126,17 +186,113 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                 disabled={isLoading}
               />
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="availability">Availability *</Label>
-              <Input
-                id="availability"
-                value={formData.availability}
-                onChange={(e) => handleInputChange("availability", e.target.value)}
-                placeholder="Mon-Fri, 9am-5pm"
-                required
-                disabled={isLoading}
-              />
+            
+            <div className="grid gap-4">
+              <Label>Working Schedule *</Label>
+              
+              {/* Default Times Section */}
+              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="grid gap-2">
+                  <Label htmlFor="defaultStart" className="text-sm font-medium">Default Start Time</Label>
+                  <Input
+                    id="defaultStart"
+                    type="time"
+                    value={defaultStartTime}
+                    onChange={(e) => setDefaultStartTime(e.target.value)}
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="defaultEnd" className="text-sm font-medium">Default End Time</Label>
+                  <Input
+                    id="defaultEnd"
+                    type="time"
+                    value={defaultEndTime}
+                    onChange={(e) => setDefaultEndTime(e.target.value)}
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="col-span-2 flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={applyToAll}
+                    disabled={isLoading}
+                    className="flex-1"
+                  >
+                    <Clock className="mr-2 h-4 w-4" />
+                    Apply to All Selected Days
+                  </Button>
+                </div>
+              </div>
+
+              {/* Day Selection */}
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium">Select Working Days</Label>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={selectAllDays}
+                      disabled={isLoading}
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={clearAllDays}
+                      disabled={isLoading}
+                    >
+                      Clear All
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  {schedule.map((day, index) => (
+                    <div key={day.day} className="flex items-center gap-4 p-3 border rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`day-${index}`}
+                          checked={day.enabled}
+                          onCheckedChange={() => toggleDay(index)}
+                          disabled={isLoading}
+                        />
+                        <Label htmlFor={`day-${index}`} className="font-medium min-w-[80px]">
+                          {day.day}
+                        </Label>
+                      </div>
+                      
+                      {day.enabled && (
+                        <div className="flex items-center gap-2 ml-4">
+                          <Input
+                            type="time"
+                            value={day.startTime}
+                            onChange={(e) => updateDayTime(index, 'startTime', e.target.value)}
+                            disabled={isLoading}
+                            className="w-24"
+                          />
+                          <span className="text-gray-500">to</span>
+                          <Input
+                            type="time"
+                            value={day.endTime}
+                            onChange={(e) => updateDayTime(index, 'endTime', e.target.value)}
+                            disabled={isLoading}
+                            className="w-24"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
+
             <div className="grid gap-2">
               <Label>Profile Picture (Optional)</Label>
               <div className="flex items-center gap-4">
