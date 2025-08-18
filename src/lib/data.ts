@@ -1,11 +1,4 @@
 import type { Appointment, Client, StaffMember, Service } from './types';
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
-
-export async function getAppointments() {
-  const snapshot = await getDocs(collection(db, "appointments"));
-  return snapshot.docs.map(doc => doc.data());
-}
 
 export const mockClients: Client[] = [
   { id: '1', name: 'John Doe', email: 'john.doe@example.com', phone: '123-456-7890', lastAppointment: new Date('2024-05-15'), preferences: 'Likes a fade on the sides, but keep the top longer. Prefers using American Crew products.', pastServices: ['Classic Haircut', 'Beard Trim'] },
@@ -27,4 +20,34 @@ export const mockServices: Service[] = [
   { id: '4', name: 'Coloring', duration: 60, price: 75, description: 'From subtle changes to bold new looks.' },
   { id: '5', name: 'Kids Cut', duration: 25, price: 25, description: 'A patient and fun haircut experience for the little ones.' },
   { id: '6', name: 'Haircut & Beard Trim Combo', duration: 50, price: 50, description: 'The complete package for a sharp look.' },
+];
+
+export const mockAppointments: Appointment[] = [
+  { 
+    id: '1', 
+    clientName: 'John Doe', 
+    service: 'Classic Haircut', 
+    staff: 'Alex Johnson', 
+    startTime: new Date('2024-08-20T14:00:00'), 
+    endTime: new Date('2024-08-20T14:30:00'), 
+    status: 'Confirmed' 
+  },
+  { 
+    id: '2', 
+    clientName: 'Jane Smith', 
+    service: 'Beard Trim', 
+    staff: 'Maria Garcia', 
+    startTime: new Date('2024-08-21T15:30:00'), 
+    endTime: new Date('2024-08-21T15:50:00'), 
+    status: 'Confirmed' 
+  },
+  { 
+    id: '3', 
+    clientName: 'Mike Williams', 
+    service: 'Hot Towel Shave', 
+    staff: 'Alex Johnson', 
+    startTime: new Date('2024-08-22T10:00:00'), 
+    endTime: new Date('2024-08-22T10:45:00'), 
+    status: 'Confirmed' 
+  },
 ];
