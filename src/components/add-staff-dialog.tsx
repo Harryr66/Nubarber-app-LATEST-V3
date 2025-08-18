@@ -40,13 +40,13 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
   const [previewUrl, setPreviewUrl] = useState<string>("");
   
   const [schedule, setSchedule] = useState<DaySchedule[]>([
-    { day: "Monday", enabled: false, startTime: "09:00", endTime: "17:00" },
-    { day: "Tuesday", enabled: false, startTime: "09:00", endTime: "17:00" },
-    { day: "Wednesday", enabled: false, startTime: "09:00", endTime: "17:00" },
-    { day: "Thursday", enabled: false, startTime: "09:00", endTime: "17:00" },
-    { day: "Friday", enabled: false, startTime: "09:00", endTime: "17:00" },
-    { day: "Saturday", enabled: false, startTime: "09:00", endTime: "17:00" },
-    { day: "Sunday", enabled: false, startTime: "09:00", endTime: "17:00" }
+    { day: "Mon", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Tue", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Wed", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Thu", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Fri", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Sat", enabled: false, startTime: "09:00", endTime: "17:00" },
+    { day: "Sun", enabled: false, startTime: "09:00", endTime: "17:00" }
   ]);
 
   const [defaultStartTime, setDefaultStartTime] = useState("09:00");
@@ -166,15 +166,16 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
           Add Staff
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[450px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="pb-3">
           <DialogTitle>Add New Staff Member</DialogTitle>
           <DialogDescription>
-            Add a new staff member to your team. Fill in the details below.
+            Add a new staff member to your team.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4">
+            {/* Name Field */}
             <div className="grid gap-2">
               <Label htmlFor="name">Full Name *</Label>
               <Input
@@ -187,59 +188,61 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
               />
             </div>
             
-            <div className="grid gap-4">
-              <Label>Working Schedule *</Label>
+            {/* Working Schedule - Compact Layout */}
+            <div className="grid gap-3">
+              <Label className="text-sm font-medium">Working Schedule *</Label>
               
-              {/* Default Times Section */}
-              <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
-                <div className="grid gap-2">
-                  <Label htmlFor="defaultStart" className="text-sm font-medium">Default Start Time</Label>
+              {/* Default Times - Horizontal Layout */}
+              <div className="grid grid-cols-3 gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+                <div className="grid gap-1">
+                  <Label className="text-xs text-slate-300">Start</Label>
                   <Input
-                    id="defaultStart"
                     type="time"
                     value={defaultStartTime}
                     onChange={(e) => setDefaultStartTime(e.target.value)}
                     disabled={isLoading}
+                    className="h-8 text-sm"
                   />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="defaultEnd" className="text-sm font-medium">Default End Time</Label>
+                <div className="grid gap-1">
+                  <Label className="text-xs text-slate-300">End</Label>
                   <Input
-                    id="defaultEnd"
                     type="time"
                     value={defaultEndTime}
                     onChange={(e) => setDefaultEndTime(e.target.value)}
                     disabled={isLoading}
+                    className="h-8 text-sm"
                   />
                 </div>
-                <div className="col-span-2 flex gap-2">
+                <div className="flex items-end">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={applyToAll}
                     disabled={isLoading}
-                    className="flex-1"
+                    className="h-8 w-full text-xs"
                   >
-                    <Clock className="mr-2 h-4 w-4" />
-                    Apply to All Selected Days
+                    <Clock className="mr-1 h-3 w-3" />
+                    Apply All
                   </Button>
                 </div>
               </div>
 
-              {/* Day Selection */}
+              {/* Day Selection - Compact Grid */}
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium">Select Working Days</Label>
-                  <div className="flex gap-2">
+                  <Label className="text-sm font-medium">Working Days</Label>
+                  <div className="flex gap-1">
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={selectAllDays}
                       disabled={isLoading}
+                      className="h-6 px-2 text-xs"
                     >
-                      Select All
+                      All
                     </Button>
                     <Button
                       type="button"
@@ -247,43 +250,44 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                       size="sm"
                       onClick={clearAllDays}
                       disabled={isLoading}
+                      className="h-6 px-2 text-xs"
                     >
-                      Clear All
+                      Clear
                     </Button>
                   </div>
                 </div>
                 
-                <div className="space-y-3">
+                {/* Days Grid - 2 rows for compact layout */}
+                <div className="grid grid-cols-2 gap-2">
                   {schedule.map((day, index) => (
-                    <div key={day.day} className="flex items-center gap-4 p-3 border rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`day-${index}`}
-                          checked={day.enabled}
-                          onCheckedChange={() => toggleDay(index)}
-                          disabled={isLoading}
-                        />
-                        <Label htmlFor={`day-${index}`} className="font-medium min-w-[80px]">
-                          {day.day}
-                        </Label>
-                      </div>
+                    <div key={day.day} className={`flex items-center gap-2 p-2 rounded border ${day.enabled ? 'border-blue-500 bg-blue-500/10' : 'border-slate-600 bg-slate-800/30'}`}>
+                      <Checkbox
+                        id={`day-${index}`}
+                        checked={day.enabled}
+                        onCheckedChange={() => toggleDay(index)}
+                        disabled={isLoading}
+                        className="h-3 w-3"
+                      />
+                      <Label htmlFor={`day-${index}`} className="text-xs font-medium min-w-[30px]">
+                        {day.day}
+                      </Label>
                       
                       {day.enabled && (
-                        <div className="flex items-center gap-2 ml-4">
+                        <div className="flex items-center gap-1 ml-auto">
                           <Input
                             type="time"
                             value={day.startTime}
                             onChange={(e) => updateDayTime(index, 'startTime', e.target.value)}
                             disabled={isLoading}
-                            className="w-24"
+                            className="w-16 h-6 text-xs"
                           />
-                          <span className="text-gray-500">to</span>
+                          <span className="text-slate-400 text-xs">-</span>
                           <Input
                             type="time"
                             value={day.endTime}
                             onChange={(e) => updateDayTime(index, 'endTime', e.target.value)}
                             disabled={isLoading}
-                            className="w-24"
+                            className="w-16 h-6 text-xs"
                           />
                         </div>
                       )}
@@ -293,16 +297,17 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
               </div>
             </div>
 
+            {/* Profile Picture - Compact */}
             <div className="grid gap-2">
               <Label>Profile Picture (Optional)</Label>
-              <div className="flex items-center gap-4">
-                <Avatar className="w-20 h-20">
+              <div className="flex items-center gap-3">
+                <Avatar className="w-16 h-16">
                   <AvatarImage src={previewUrl} alt="Profile preview" />
-                  <AvatarFallback className="text-lg">
+                  <AvatarFallback className="text-sm">
                     {formData.name ? formData.name.charAt(0) : "?"}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2 flex-1">
                   <div className="flex items-center gap-2">
                     <Button
                       type="button"
@@ -310,9 +315,10 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                       size="sm"
                       onClick={() => document.getElementById('profile-upload')?.click()}
                       disabled={isLoading}
+                      className="h-8 text-xs"
                     >
-                      <Upload className="mr-2 h-4 w-4" />
-                      Upload Photo
+                      <Upload className="mr-1 h-3 w-3" />
+                      Upload
                     </Button>
                     {profileImage && (
                       <Button
@@ -321,9 +327,9 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                         size="sm"
                         onClick={removeImage}
                         disabled={isLoading}
+                        className="h-8 px-2 text-xs"
                       >
-                        <X className="mr-2 h-4 w-4" />
-                        Remove
+                        <X className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
@@ -335,14 +341,14 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                     className="hidden"
                     disabled={isLoading}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    {profileImage ? profileImage.name : "Click to upload a profile picture"}
+                  <p className="text-xs text-slate-400">
+                    {profileImage ? profileImage.name : "Click to upload"}
                   </p>
                 </div>
               </div>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="pt-4">
             <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
               Cancel
             </Button>
