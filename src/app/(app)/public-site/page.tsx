@@ -156,7 +156,7 @@ export default function PublicSitePage() {
 
   // Handle copy URL
   const handleCopyUrl = async () => {
-    const url = `https://www.nubarber.com/${derivedUrl}`;
+    const url = `${derivedUrl}.nubarber.com`;
     try {
       await navigator.clipboard.writeText(url);
       alert("URL copied to clipboard!");
@@ -238,12 +238,12 @@ export default function PublicSitePage() {
                         </p>
                     </div>
                      <div className="space-y-2">
-                        <Label>Custom URL</Label>
-                        <div className="flex items-center p-2 rounded-md bg-gray-100 border">
-                           <p className="text-sm font-medium">{derivedUrl}<span className="text-gray-500">.nubarber.com</span></p>
+                        <Label>Your Custom URL</Label>
+                        <div className="flex items-center p-3 rounded-md bg-gray-100 border">
+                           <span className="text-lg font-mono font-semibold text-gray-900">{derivedUrl}.nubarber.com</span>
                         </div>
                          <p className="text-sm text-muted-foreground">
-                            Your custom URL is automatically generated from your business name: {businessName}.
+                            This is your unique booking page URL. Customers will visit this address to book appointments.
                         </p>
                     </div>
                      <div className="space-y-2">
@@ -275,11 +275,11 @@ export default function PublicSitePage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-900">
-                        <p><strong>Current:</strong> https://www.nubarber.com/{derivedUrl}</p>
-                        <p><strong>Future:</strong> {derivedUrl}.nubarber.com (requires DNS setup)</p>
+                        <p><strong>Your Booking URL:</strong> {derivedUrl}.nubarber.com</p>
+                        <p className="text-xs mt-1">This is the direct URL customers will use to book appointments.</p>
                     </div>
                     <div className="flex items-center">
-                        <Input readOnly value={`https://www.nubarber.com/${derivedUrl}`} />
+                        <Input readOnly value={`${derivedUrl}.nubarber.com`} />
                         <Button variant="ghost" size="icon" className="ml-2" onClick={handleCopyUrl}>
                             <Copy className="h-4 w-4" />
                         </Button>
