@@ -6,14 +6,23 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, X, Copy, Eye, Image as ImageIcon } from "lucide-react";
+import { Upload, X, Copy, Eye, Image as ImageIcon, Calendar, Clock, MapPin, Phone, Mail, X as CloseIcon } from "lucide-react";
 import Image from "next/image";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -25,7 +34,12 @@ export default function PublicSitePage() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Form data state
+  const [headline, setHeadline] = useState("Book your next appointment with us");
+  const [description, setDescription] = useState("Easy and fast booking, available 24/7.");
 
   // Handle file selection
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,6 +105,18 @@ export default function PublicSitePage() {
     
     // Save other changes
     alert("Changes saved successfully!");
+  };
+
+  // Handle copy URL
+  const handleCopyUrl = async () => {
+    const url = `https://www.nubarber.com/${derivedUrl}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      alert("URL copied to clipboard!");
+    } catch (error) {
+      console.error("Failed to copy URL:", error);
+      alert("Failed to copy URL. Please copy manually.");
+    }
   };
 
   return (
@@ -175,11 +201,21 @@ export default function PublicSitePage() {
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="headline">Headline</Label>
-                        <Input id="headline" defaultValue="Book your next appointment with us" />
+                        <Input 
+                          id="headline" 
+                          value={headline}
+                          onChange={(e) => setHeadline(e.target.value)}
+                          placeholder="Enter your headline"
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="description">Description</Label>
-                        <Textarea id="description" defaultValue="Easy and fast booking, available 24/7." />
+                        <Textarea 
+                          id="description" 
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          placeholder="Enter your description"
+                        />
                     </div>
                 </CardContent>
             </Card>
@@ -197,14 +233,152 @@ export default function PublicSitePage() {
                     </div>
                     <div className="flex items-center">
                         <Input readOnly value={`https://www.nubarber.com/${derivedUrl}`} />
-                        <Button variant="ghost" size="icon" className="ml-2">
+                        <Button variant="ghost" size="icon" className="ml-2" onClick={handleCopyUrl}>
                             <Copy className="h-4 w-4" />
                         </Button>
                     </div>
-                    <Button className="w-full"><Eye className="mr-2"/> Preview Website</Button>
+                    <Dialog open={showPreview} onOpenChange={setShowPreview}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full">
+                          <Eye className="mr-2 h-4 w-4"/> Preview Website
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>Website Preview</DialogTitle>
+                          <DialogDescription>
+                            This is how your public booking page will appear to customers
+                          </DialogDescription>
+                        </DialogHeader>
+                        
+                        {/* Website Preview */}
+                        <div className="border rounded-lg overflow-hidden bg-white">
+                          {/* Header */}
+                          <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white p-6">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-lg bg-white/20 flex items-center justify-center">
+                                  {logoPreview ? (
+                                    <Image 
+                                      src={logoPreview} 
+                                      alt="Shop Logo" 
+                                      width={48} 
+                                      height={48} 
+                                      className="w-full h-full object-cover rounded-lg"
+                                    />
+                                  ) : (
+                                    <ImageIcon className="h-8 w-8 text-white/80" />
+                                  )}
+                                </div>
+                                <div>
+                                  <h1 className="text-2xl font-bold">{businessName}</h1>
+                                  <p className="text-blue-100">Professional Barber Services</p>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Phone className="h-4 w-4" />
+                                  <span>+1 (555) 123-4567</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-sm">
+                                  <Mail className="h-4 w-4" />
+                                  <span>info@{derivedUrl}.com</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Hero Section */}
+                          <div className="p-8 text-center bg-gray-50">
+                            <h2 className="text-3xl font-bold text-gray-900 mb-4">{headline}</h2>
+                            <p className="text-lg text-gray-600 mb-6">{description}</p>
+                            <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+                              Book Appointment Now
+                            </Button>
+                          </div>
+
+                          {/* Services Section */}
+                          <div className="p-8">
+                            <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Our Services</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                              <div className="text-center p-4 border rounded-lg">
+                                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                  <span className="text-2xl">✂️</span>
+                                </div>
+                                <h4 className="font-semibold text-lg mb-2">Haircut</h4>
+                                <p className="text-gray-600">Professional haircuts for all styles</p>
+                                <p className="text-blue-600 font-semibold mt-2">$25</p>
+                              </div>
+                              <div className="text-center p-4 border rounded-lg">
+                                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                  <span className="text-2xl">🧔</span>
+                                </div>
+                                <h4 className="font-semibold text-lg mb-2">Beard Trim</h4>
+                                <p className="text-gray-600">Expert beard grooming and styling</p>
+                                <p className="text-blue-600 font-semibold mt-2">$15</p>
+                              </div>
+                              <div className="text-center p-4 border rounded-lg">
+                                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                  <span className="text-2xl">💈</span>
+                                </div>
+                                <h4 className="font-semibold text-lg mb-2">Full Service</h4>
+                                <p className="text-gray-600">Haircut, beard trim, and styling</p>
+                                <p className="text-blue-600 font-semibold mt-2">$35</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Contact & Hours */}
+                          <div className="bg-gray-50 p-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                              <div>
+                                <h3 className="text-xl font-semibold mb-4">Contact Information</h3>
+                                <div className="space-y-3">
+                                  <div className="flex items-center gap-3">
+                                    <MapPin className="h-5 w-5 text-blue-600" />
+                                    <span>123 Main Street, Anytown, USA</span>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <Phone className="h-5 w-5 text-blue-600" />
+                                    <span>+1 (555) 123-4567</span>
+                                  </div>
+                                  <div className="flex items-center gap-3">
+                                    <Mail className="h-5 w-5 text-blue-600" />
+                                    <span>info@{derivedUrl}.com</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div>
+                                <h3 className="text-xl font-semibold mb-4">Business Hours</h3>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between">
+                                    <span>Monday - Friday</span>
+                                    <span>9:00 AM - 7:00 PM</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Saturday</span>
+                                    <span>9:00 AM - 5:00 PM</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Sunday</span>
+                                    <span>Closed</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Footer */}
+                          <div className="bg-gray-800 text-white p-6 text-center">
+                            <p>&copy; 2024 {businessName}. All rights reserved.</p>
+                            <p className="text-gray-400 text-sm mt-2">Powered by NuBarber</p>
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                      <p className="text-xs text-muted-foreground text-center">
-                        Debug: Preview URL will be https://www.nubarber.com/{derivedUrl}
-                    </p>
+                        Click "Preview Website" to see how your booking page will appear to customers
+                     </p>
                 </CardContent>
             </Card>
 
