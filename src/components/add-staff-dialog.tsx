@@ -166,7 +166,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
           Add Staff
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
         <DialogHeader className="pb-3">
           <DialogTitle>Add New Staff Member</DialogTitle>
           <DialogDescription>
@@ -201,7 +201,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                     value={defaultStartTime}
                     onChange={(e) => setDefaultStartTime(e.target.value)}
                     disabled={isLoading}
-                    className="h-8 text-sm w-20"
+                    className="h-8 text-sm w-24"
                   />
                 </div>
                 <div className="grid gap-1">
@@ -211,7 +211,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                     value={defaultEndTime}
                     onChange={(e) => setDefaultEndTime(e.target.value)}
                     disabled={isLoading}
-                    className="h-8 text-sm w-20"
+                    className="h-8 text-sm w-24"
                   />
                 </div>
                 <div className="flex items-end">
@@ -279,7 +279,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                             value={day.startTime}
                             onChange={(e) => updateDayTime(index, 'startTime', e.target.value)}
                             disabled={isLoading}
-                            className="w-20 h-6 text-xs"
+                            className="w-24 h-6 text-xs"
                           />
                           <span className="text-slate-400 text-xs">-</span>
                           <Input
@@ -287,7 +287,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                             value={day.endTime}
                             onChange={(e) => updateDayTime(index, 'endTime', e.target.value)}
                             disabled={isLoading}
-                            className="w-20 h-6 text-xs"
+                            className="w-24 h-6 text-xs"
                           />
                         </div>
                       )}
