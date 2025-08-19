@@ -30,6 +30,23 @@ export default function PublicSitePage() {
   const businessName = "Harrys Barbers";
   const derivedUrl = businessName.toLowerCase().replace(/\s+/g, '');
   
+  // URL configuration - fallback to working domain if .nubarber.com is not available
+  const getWorkingUrl = () => {
+    // Check if we're in production and have a working domain
+    if (typeof window !== 'undefined') {
+      const currentDomain = window.location.hostname;
+      // If we have a custom domain or are on vercel.app, use subpath
+      if (currentDomain.includes('vercel.app') || currentDomain.includes('nubarber.com')) {
+        return `${currentDomain}/${derivedUrl}`;
+      }
+    }
+    // Fallback to current deployment URL
+    return `download-nqpfv9azq-harrys-projects-4097042e.vercel.app/${derivedUrl}`;
+  };
+
+  const workingUrl = getWorkingUrl();
+  const whiteLabelUrl = `${derivedUrl}.nubarber.com`;
+  
   // Logo state management
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>("");
@@ -156,10 +173,9 @@ export default function PublicSitePage() {
 
   // Handle copy URL
   const handleCopyUrl = async () => {
-    const url = `${derivedUrl}.nubarber.com`;
     try {
-      await navigator.clipboard.writeText(url);
-      alert("URL copied to clipboard!");
+      await navigator.clipboard.writeText(workingUrl);
+      alert("Working URL copied to clipboard!");
     } catch (error) {
       console.error("Failed to copy URL:", error);
       alert("Failed to copy URL. Please copy manually.");
@@ -239,11 +255,28 @@ export default function PublicSitePage() {
                     </div>
                      <div className="space-y-2">
                         <Label>Your Custom URL</Label>
-                        <div className="flex items-center p-3 rounded-md bg-gray-100 border">
-                           <span className="text-lg font-mono font-semibold text-gray-900">{derivedUrl}.nubarber.com</span>
+                        <div className="space-y-3">
+                          {/* White Label URL (Future) */}
+                          <div className="p-3 rounded-md bg-blue-50 border border-blue-200">
+                            <div className="flex items-center justify-between">
+                              <span className="text-lg font-mono font-semibold text-blue-900">{whiteLabelUrl}</span>
+                              <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">Future</span>
+                            </div>
+                            <p className="text-sm text-blue-700 mt-1">Your white-label domain (requires DNS setup)</p>
+                          </div>
+                          
+                          {/* Working URL (Current) */}
+                          <div className="p-3 rounded-md bg-green-50 border border-green-200">
+                            <div className="flex items-center justify-between">
+                              <span className="text-lg font-mono font-semibold text-green-900">{workingUrl}</span>
+                              <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full">Active</span>
+                            </div>
+                            <p className="text-sm text-green-700 mt-1">Your working booking page (ready to use now)</p>
+                          </div>
                         </div>
-                         <p className="text-sm text-muted-foreground">
-                            This is your unique booking page URL. Customers will visit this address to book appointments.
+                        <p className="text-sm text-muted-foreground">
+                            <strong>White-label URL:</strong> Available once DNS is configured for .nubarber.com domain.<br/>
+                            <strong>Working URL:</strong> Use this link immediately to share with customers.
                         </p>
                     </div>
                      <div className="space-y-2">
@@ -274,15 +307,28 @@ export default function PublicSitePage() {
                     <CardDescription>Share this link with your clients.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-900">
-                        <p><strong>Your Booking URL:</strong> {derivedUrl}.nubarber.com</p>
-                        <p className="text-xs mt-1">This is the direct URL customers will use to book appointments.</p>
+                    <div className="space-y-3">
+                      {/* White Label URL */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-900">
+                        <p><strong>White-Label URL:</strong> {whiteLabelUrl}</p>
+                        <p className="text-xs mt-1">Future domain (requires DNS setup)</p>
+                      </div>
+                      
+                      {/* Working URL */}
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-900">
+                        <p><strong>Working URL:</strong> {workingUrl}</p>
+                        <p className="text-xs mt-1">Ready to use now - share with customers</p>
+                      </div>
                     </div>
-                    <div className="flex items-center">
-                        <Input readOnly value={`${derivedUrl}.nubarber.com`} />
-                        <Button variant="ghost" size="icon" className="ml-2" onClick={handleCopyUrl}>
-                            <Copy className="h-4 w-4" />
-                        </Button>
+                    
+                    <div className="space-y-2">
+                      <Label>Copy Working URL</Label>
+                      <div className="flex items-center">
+                          <Input readOnly value={workingUrl} />
+                          <Button variant="ghost" size="icon" className="ml-2" onClick={handleCopyUrl}>
+                              <Copy className="h-4 w-4" />
+                          </Button>
+                      </div>
                     </div>
                     <Dialog open={showPreview} onOpenChange={setShowPreview}>
                       <DialogTrigger asChild>
@@ -329,7 +375,7 @@ export default function PublicSitePage() {
                                 </div>
                                 <div className="flex items-center gap-2 text-sm">
                                   <Mail className="h-4 w-4" />
-                                  <span>info@{derivedUrl}.com</span>
+                                  <span>info@{businessName.toLowerCase().replace(/\s+/g, '')}.com</span>
                                 </div>
                               </div>
                             </div>
@@ -455,7 +501,7 @@ export default function PublicSitePage() {
                                   </div>
                                   <div className="flex items-center gap-3">
                                     <Mail className="h-5 w-5 text-black" />
-                                    <span>info@{derivedUrl}.com</span>
+                                    <span>info@{businessName.toLowerCase().replace(/\s+/g, '')}.com</span>
                                   </div>
                                 </div>
                               </div>
@@ -487,6 +533,9 @@ export default function PublicSitePage() {
                         </div>
                       </DialogContent>
                     </Dialog>
+                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-900">
+                       <p><strong>Note:</strong> The preview shows how your page will look. To test the actual booking functionality, visit: <strong>{workingUrl}</strong></p>
+                     </div>
                      <p className="text-xs text-muted-foreground text-center">
                         Click "Preview Website" to see how your booking page will appear to customers
                      </p>
