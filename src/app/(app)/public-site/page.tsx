@@ -1,4 +1,6 @@
+"use client";
 
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,12 +20,86 @@ export const dynamic = "force-dynamic";
 export default function PublicSitePage() {
   const businessName = "Harrys Barbers";
   const derivedUrl = businessName.toLowerCase().replace(/\s+/g, '');
+  
+  // Logo state management
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle file selection
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file size (1MB = 1024 * 1024 bytes)
+      if (file.size > 1024 * 1024) {
+        alert("File size must be less than 1MB");
+        return;
+      }
+      
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert("Please select an image file");
+        return;
+      }
+
+      setLogoFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Handle upload button click
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handle remove logo
+  const handleRemoveLogo = () => {
+    setLogoFile(null);
+    setLogoPreview("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Handle save changes
+  const handleSaveChanges = async () => {
+    if (logoFile) {
+      setIsUploading(true);
+      try {
+        // Simulate file upload - in production this would go to your storage service
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Here you would typically upload to Firebase Storage, AWS S3, etc.
+        console.log("Logo uploaded:", logoFile.name);
+        
+        // Show success message
+        alert("Logo uploaded successfully!");
+      } catch (error) {
+        console.error("Upload failed:", error);
+        alert("Upload failed. Please try again.");
+      } finally {
+        setIsUploading(false);
+      }
+    }
+    
+    // Save other changes
+    alert("Changes saved successfully!");
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold font-headline">Public Site</h1>
-        <Button>Save Changes</Button>
+        <h1 className="text-3xl font-bold font-heading">Public Site</h1>
+        <Button onClick={handleSaveChanges} disabled={isUploading}>
+          {isUploading ? "Saving..." : "Save Changes"}
+        </Button>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
@@ -36,17 +112,56 @@ export default function PublicSitePage() {
                     <div className="space-y-2">
                         <Label>Shop Logo</Label>
                         <div className="flex items-center gap-4">
-                            <div className="w-20 h-20 rounded-lg bg-secondary flex items-center justify-center border">
-                                <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                            <div className="w-20 h-20 rounded-lg bg-secondary flex items-center justify-center border overflow-hidden">
+                                {logoPreview ? (
+                                  <Image 
+                                    src={logoPreview} 
+                                    alt="Shop Logo" 
+                                    width={80} 
+                                    height={80} 
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                                )}
                             </div>
                             <div className="flex gap-2">
-                                <Button variant="outline"><Upload className="mr-2" /> Upload Logo</Button>
+                                <input
+                                  ref={fileInputRef}
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={handleFileSelect}
+                                  className="hidden"
+                                />
+                                <Button 
+                                  variant="outline" 
+                                  onClick={handleUploadClick}
+                                  disabled={isUploading}
+                                >
+                                  <Upload className="mr-2 h-4 w-4" /> 
+                                  {logoFile ? "Change Logo" : "Upload Logo"}
+                                </Button>
+                                {logoFile && (
+                                  <Button 
+                                    variant="outline" 
+                                    onClick={handleRemoveLogo}
+                                    disabled={isUploading}
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  >
+                                    <X className="mr-2 h-4 w-4" /> Remove
+                                  </Button>
+                                )}
                             </div>
                         </div>
                         <p className="text-sm text-muted-foreground">
                             Upload your shop logo (max 1MB). This will be displayed prominently on your public booking page.
                             <br />
                             Recommended: Square image, 500x500 pixels or smaller for best performance.
+                            {logoFile && (
+                              <span className="block mt-1 text-green-600">
+                                ✓ Logo selected: {logoFile.name} ({(logoFile.size / 1024).toFixed(1)}KB)
+                              </span>
+                            )}
                         </p>
                     </div>
                      <div className="space-y-2">
@@ -92,16 +207,7 @@ export default function PublicSitePage() {
                     </p>
                 </CardContent>
             </Card>
-             <Card className="hidden lg:block">
-                <CardHeader>
-                    <CardTitle>Website Preview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="aspect-video bg-secondary rounded-lg flex items-center justify-center">
-                         <Image src="https://placehold.co/1920x1080.png" alt="Website preview" width={1920} height={1080} className="rounded-md" data-ai-hint="website screenshot" />
-                    </div>
-                </CardContent>
-            </Card>
+
         </div>
       </div>
     </div>
