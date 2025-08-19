@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAccountDetails } from '@/lib/stripe';
 
 export async function GET(request: NextRequest) {
+  // Check if Stripe is configured
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.redirect(
+      `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/settings?tab=stripe&error=${encodeURIComponent('Stripe is not configured')}`
+    );
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const accountId = searchParams.get('account_id');

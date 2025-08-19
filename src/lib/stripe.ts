@@ -1,9 +1,11 @@
 import Stripe from 'stripe';
 
 // Initialize Stripe with your secret key
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-});
+export const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-07-30.basil',
+    })
+  : null;
 
 // Stripe Connect configuration
 export const STRIPE_CONFIG = {
@@ -46,6 +48,10 @@ export interface StripeConnectionStatus {
 
 // Helper function to create Connect account link
 export async function createAccountLink(accountId: string, refreshUrl: string, returnUrl: string) {
+  if (!stripe) {
+    throw new Error('Stripe not configured. Please set STRIPE_SECRET_KEY environment variable.');
+  }
+  
   try {
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
@@ -63,6 +69,10 @@ export async function createAccountLink(accountId: string, refreshUrl: string, r
 
 // Helper function to get account details
 export async function getAccountDetails(accountId: string): Promise<StripeAccount> {
+  if (!stripe) {
+    throw new Error('Stripe not configured. Please set STRIPE_SECRET_KEY environment variable.');
+  }
+  
   try {
     const account = await stripe.accounts.retrieve(accountId);
     return account as unknown as StripeAccount;
@@ -74,6 +84,10 @@ export async function getAccountDetails(accountId: string): Promise<StripeAccoun
 
 // Helper function to create a Connect account
 export async function createConnectAccount(email: string, country: string = 'US') {
+  if (!stripe) {
+    throw new Error('Stripe not configured. Please set STRIPE_SECRET_KEY environment variable.');
+  }
+  
   try {
     const account = await stripe.accounts.create({
       type: 'express',

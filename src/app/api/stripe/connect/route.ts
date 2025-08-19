@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createConnectAccount, createAccountLink } from '@/lib/stripe';
 
 export async function POST(request: NextRequest) {
+  // Check if Stripe is configured
+  if (!process.env.STRIPE_SECRET_KEY) {
+    return NextResponse.json(
+      { error: 'Stripe is not configured. Please set up your environment variables.' },
+      { status: 500 }
+    );
+  }
+
   try {
     const body = await request.json();
     const { email, country = 'US' } = body;
