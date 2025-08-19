@@ -100,16 +100,16 @@ export default function PublicPage({ params }: PublicPageProps) {
         colorClass = 'bg-gray-300 text-gray-600';
         status = 'Closed';
       } else if (capacity <= 25) {
-        colorClass = 'bg-red-100 text-red-800 border-red-200';
+        colorClass = 'bg-red-500 text-white';
         status = 'Limited';
       } else if (capacity <= 50) {
-        colorClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        colorClass = 'bg-orange-500 text-white';
         status = 'Moderate';
       } else if (capacity <= 75) {
-        colorClass = 'bg-blue-100 text-blue-800 border-blue-200';
+        colorClass = 'bg-green-400 text-black';
         status = 'Good';
       } else {
-        colorClass = 'bg-green-100 text-green-800 border-green-200';
+        colorClass = 'bg-green-600 text-white';
         status = 'Wide Open';
       }
       
@@ -218,7 +218,7 @@ export default function PublicPage({ params }: PublicPageProps) {
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
             <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 text-yellow-500 fill-current" />
+              <Star className="h-4 w-4 text-black fill-current" />
               <span>4.9/5</span>
             </div>
             <span>•</span>
@@ -296,7 +296,7 @@ export default function PublicPage({ params }: PublicPageProps) {
                         <div className="text-xs font-medium">{day.dayName}</div>
                         <div className="text-lg font-bold">{day.dayNumber}</div>
                         {day.isToday && (
-                          <div className="text-xs text-blue-600 font-semibold">TODAY</div>
+                          <div className="text-xs text-black font-semibold">TODAY</div>
                         )}
                       </button>
                     </div>
@@ -306,19 +306,19 @@ export default function PublicPage({ params }: PublicPageProps) {
                 {/* Legend */}
                 <div className="mt-4 flex justify-center gap-4 text-xs">
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-green-100 border border-green-200 rounded"></div>
+                    <div className="w-3 h-3 bg-green-600 rounded"></div>
                     <span>Wide Open</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-blue-100 border border-blue-200 rounded"></div>
+                    <div className="w-3 h-3 bg-green-400 rounded"></div>
                     <span>Good</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-yellow-100 border border-yellow-200 rounded"></div>
+                    <div className="w-3 h-3 bg-orange-500 rounded"></div>
                     <span>Moderate</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-red-100 border border-red-200 rounded"></div>
+                    <div className="w-3 h-3 bg-red-500 rounded"></div>
                     <span>Limited</span>
                   </div>
                 </div>
