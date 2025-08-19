@@ -166,7 +166,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
           Add Staff
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[550px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader className="pb-3">
           <DialogTitle>Add New Staff Member</DialogTitle>
           <DialogDescription>
@@ -201,7 +201,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                     value={defaultStartTime}
                     onChange={(e) => setDefaultStartTime(e.target.value)}
                     disabled={isLoading}
-                    className="h-8 text-sm w-24"
+                    className="h-8 text-sm w-28"
                   />
                 </div>
                 <div className="grid gap-1">
@@ -211,7 +211,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                     value={defaultEndTime}
                     onChange={(e) => setDefaultEndTime(e.target.value)}
                     disabled={isLoading}
-                    className="h-8 text-sm w-24"
+                    className="h-8 text-sm w-28"
                   />
                 </div>
                 <div className="flex items-end">
@@ -258,9 +258,9 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                 </div>
                 
                 {/* Days Grid - 2 rows for compact layout */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   {schedule.map((day, index) => (
-                    <div key={day.day} className={`flex items-center gap-2 p-2 rounded border ${day.enabled ? 'border-blue-500 bg-blue-500/10' : 'border-slate-600 bg-slate-800/30'}`}>
+                    <div key={day.day} className={`flex items-center gap-3 p-3 rounded border ${day.enabled ? 'border-blue-500 bg-blue-500/10' : 'border-slate-600 bg-slate-800/30'}`}>
                       <Checkbox
                         id={`day-${index}`}
                         checked={day.enabled}
@@ -268,18 +268,18 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                         disabled={isLoading}
                         className="h-3 w-3"
                       />
-                      <Label htmlFor={`day-${index}`} className="text-xs font-medium min-w-[30px]">
+                      <Label htmlFor={`day-${index}`} className="text-xs font-medium min-w-[35px]">
                         {day.day}
                       </Label>
                       
                       {day.enabled && (
-                        <div className="flex items-center gap-1 ml-auto">
+                        <div className="flex items-center gap-2 ml-auto">
                           <Input
                             type="time"
                             value={day.startTime}
                             onChange={(e) => updateDayTime(index, 'startTime', e.target.value)}
                             disabled={isLoading}
-                            className="w-24 h-6 text-xs"
+                            className="w-28 h-6 text-xs"
                           />
                           <span className="text-slate-400 text-xs">-</span>
                           <Input
@@ -287,7 +287,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                             value={day.endTime}
                             onChange={(e) => updateDayTime(index, 'endTime', e.target.value)}
                             disabled={isLoading}
-                            className="w-24 h-6 text-xs"
+                            className="w-28 h-6 text-xs"
                           />
                         </div>
                       )}
