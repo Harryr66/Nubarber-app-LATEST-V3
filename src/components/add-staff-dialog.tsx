@@ -70,8 +70,8 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
       ).join(", ");
 
       // In a real app, you'd upload the image to Firebase Storage here
-      // For now, we'll use a placeholder or the preview URL
-      let finalAvatarUrl = "https://placehold.co/100x100.png";
+      // For now, we'll use a default avatar or the preview URL
+      let finalAvatarUrl = "/images/default-avatar.png";
       
       if (profileImage) {
         // Simulate image upload - in production this would go to Firebase Storage

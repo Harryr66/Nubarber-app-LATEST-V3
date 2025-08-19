@@ -79,7 +79,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="justify-start gap-2 w-full px-2">
                         <Avatar className="h-8 w-8">
-                            <AvatarImage src="https://placehold.co/100x100.png" alt="User" data-ai-hint="user avatar" />
+                            <AvatarImage src="/images/default-avatar.png" alt="User" data-ai-hint="user avatar" />
                             <AvatarFallback>U</AvatarFallback>
                         </Avatar>
                         <span className="truncate">Loading...</span>
