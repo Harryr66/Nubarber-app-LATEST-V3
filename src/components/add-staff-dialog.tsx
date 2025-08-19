@@ -166,7 +166,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
           Add Staff
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
         <DialogHeader className="pb-3">
           <DialogTitle>Add New Staff Member</DialogTitle>
           <DialogDescription>
@@ -258,9 +258,9 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                 </div>
                 
                 {/* Days Grid - Clean Layout */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   {schedule.map((day, index) => (
-                    <div key={day.day} className={`flex items-center gap-3 p-2 rounded border ${day.enabled ? 'border-blue-500' : 'border-slate-600'}`}>
+                    <div key={day.day} className={`flex items-center gap-3 p-3 rounded border ${day.enabled ? 'border-blue-500' : 'border-slate-600'}`}>
                       <Checkbox
                         id={`day-${index}`}
                         checked={day.enabled}
@@ -268,7 +268,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                         disabled={isLoading}
                         className="h-3 w-3"
                       />
-                      <Label htmlFor={`day-${index}`} className="text-xs font-medium min-w-[35px]">
+                      <Label htmlFor={`day-${index}`} className="text-xs font-medium min-w-[40px]">
                         {day.day}
                       </Label>
                       
@@ -279,7 +279,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                             value={day.startTime}
                             onChange={(e) => updateDayTime(index, 'startTime', e.target.value)}
                             disabled={isLoading}
-                            className="w-24 h-6 text-xs"
+                            className="w-28 h-6 text-xs"
                           />
                           <span className="text-slate-400 text-xs">-</span>
                           <Input
@@ -287,7 +287,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                             value={day.endTime}
                             onChange={(e) => updateDayTime(index, 'endTime', e.target.value)}
                             disabled={isLoading}
-                            className="w-24 h-6 text-xs"
+                            className="w-28 h-6 text-xs"
                           />
                         </div>
                       )}
