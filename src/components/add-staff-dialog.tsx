@@ -166,7 +166,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
           Add Staff
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader className="pb-3">
           <DialogTitle>Add New Staff Member</DialogTitle>
           <DialogDescription>
@@ -192,8 +192,8 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
             <div className="grid gap-3">
               <Label className="text-sm font-medium">Working Schedule *</Label>
               
-              {/* Default Times - Horizontal Layout */}
-              <div className="grid grid-cols-3 gap-3 p-3 bg-slate-800/50 rounded-lg border border-slate-700">
+              {/* Default Times - Simple Layout */}
+              <div className="grid grid-cols-3 gap-3">
                 <div className="grid gap-1">
                   <Label className="text-xs text-slate-300">Start</Label>
                   <Input
@@ -201,7 +201,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                     value={defaultStartTime}
                     onChange={(e) => setDefaultStartTime(e.target.value)}
                     disabled={isLoading}
-                    className="h-8 text-sm w-28"
+                    className="h-8 text-sm"
                   />
                 </div>
                 <div className="grid gap-1">
@@ -211,7 +211,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                     value={defaultEndTime}
                     onChange={(e) => setDefaultEndTime(e.target.value)}
                     disabled={isLoading}
-                    className="h-8 text-sm w-28"
+                    className="h-8 text-sm"
                   />
                 </div>
                 <div className="flex items-end">
@@ -229,7 +229,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                 </div>
               </div>
 
-              {/* Day Selection - Compact Grid */}
+              {/* Day Selection - Clean Grid */}
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium">Working Days</Label>
@@ -257,10 +257,10 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                   </div>
                 </div>
                 
-                {/* Days Grid - 2 rows for compact layout */}
-                <div className="grid grid-cols-2 gap-3">
+                {/* Days Grid - Clean Layout */}
+                <div className="grid grid-cols-2 gap-2">
                   {schedule.map((day, index) => (
-                    <div key={day.day} className={`flex items-center gap-3 p-3 rounded border ${day.enabled ? 'border-blue-500 bg-blue-500/10' : 'border-slate-600 bg-slate-800/30'}`}>
+                    <div key={day.day} className={`flex items-center gap-3 p-2 rounded border ${day.enabled ? 'border-blue-500' : 'border-slate-600'}`}>
                       <Checkbox
                         id={`day-${index}`}
                         checked={day.enabled}
@@ -279,7 +279,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                             value={day.startTime}
                             onChange={(e) => updateDayTime(index, 'startTime', e.target.value)}
                             disabled={isLoading}
-                            className="w-28 h-6 text-xs"
+                            className="w-24 h-6 text-xs"
                           />
                           <span className="text-slate-400 text-xs">-</span>
                           <Input
@@ -287,7 +287,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                             value={day.endTime}
                             onChange={(e) => updateDayTime(index, 'endTime', e.target.value)}
                             disabled={isLoading}
-                            className="w-28 h-6 text-xs"
+                            className="w-24 h-6 text-xs"
                           />
                         </div>
                       )}
@@ -297,7 +297,7 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
               </div>
             </div>
 
-            {/* Profile Picture - Compact */}
+            {/* Profile Picture - Simple */}
             <div className="grid gap-2">
               <Label>Profile Picture (Optional)</Label>
               <div className="flex items-center gap-3">
@@ -307,32 +307,18 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                     {formData.name ? formData.name.charAt(0) : "?"}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex flex-col gap-2 flex-1">
-                  <div className="flex items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => document.getElementById('profile-upload')?.click()}
-                      disabled={isLoading}
-                      className="h-8 text-xs"
-                    >
-                      <Upload className="mr-1 h-3 w-3" />
-                      Upload
-                    </Button>
-                    {profileImage && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={removeImage}
-                        disabled={isLoading}
-                        className="h-8 px-2 text-xs"
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
+                <div className="flex flex-col gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('profile-upload')?.click()}
+                    disabled={isLoading}
+                    className="h-8 text-xs"
+                  >
+                    <Upload className="mr-1 h-3 w-3" />
+                    Upload Photo
+                  </Button>
                   <input
                     id="profile-upload"
                     type="file"
@@ -341,9 +327,19 @@ export function AddStaffDialog({ onStaffAdded }: AddStaffDialogProps) {
                     className="hidden"
                     disabled={isLoading}
                   />
-                  <p className="text-xs text-slate-400">
-                    {profileImage ? profileImage.name : "Click to upload"}
-                  </p>
+                  {profileImage && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={removeImage}
+                      disabled={isLoading}
+                      className="h-8 px-2 text-xs"
+                    >
+                      <X className="mr-1 h-3 w-3" />
+                      Remove
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
