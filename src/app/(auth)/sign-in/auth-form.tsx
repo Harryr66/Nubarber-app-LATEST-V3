@@ -143,8 +143,8 @@ export default function AuthForm() {
     setError("");
     
     const formData = new FormData(e.target as HTMLFormElement);
-    const email = formData.get("email-signup") as string;
-    const password = formData.get("password-signup") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
     const shopName = formData.get("shop-name") as string;
     const businessAddress = formData.get("business-address") as string;
     
@@ -182,27 +182,35 @@ export default function AuthForm() {
     
     try {
       // In production, this would make an API call to your backend
+      const requestBody = { 
+        email, 
+        password, 
+        shopName, 
+        locationType,
+        businessAddress,
+        staffCount 
+      };
+      
+      console.log('Sending signup request:', requestBody);
+      
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          email, 
-          password, 
-          shopName, 
-          locationType,
-          businessAddress,
-          staffCount 
-        }),
+        body: JSON.stringify(requestBody),
       });
 
+      console.log('Signup response status:', response.status);
+      
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('Signup error response:', errorData);
         throw new Error(errorData.message || 'Account creation failed');
       }
 
       const userData = await response.json();
+      console.log('Signup success:', userData);
       
       // Use the auth context to login with user data
       login(userData.user);
@@ -210,6 +218,7 @@ export default function AuthForm() {
       // Redirect to dashboard
       router.push('/dashboard');
     } catch (err: any) {
+      console.error('Signup error:', err);
       // Handle specific error cases
       if (err.message.includes('Email already exists')) {
         setError("An account with this email already exists. Please sign in instead.");
@@ -218,7 +227,7 @@ export default function AuthForm() {
       } else if (err.message.includes('Weak password')) {
         setError("Password is too weak. Please choose a stronger password.");
       } else {
-        setError("Account creation failed. Please try again.");
+        setError(`Account creation failed: ${err.message}`);
       }
     } finally {
       setIsLoading(false);
@@ -308,7 +317,7 @@ export default function AuthForm() {
                 <Label htmlFor="email-signup">Email Address</Label>
                 <Input
                   id="email-signup"
-                  name="email-signup"
+                  name="email"
                   type="email"
                   placeholder="your@email.com"
                   required
@@ -321,7 +330,7 @@ export default function AuthForm() {
                 <div className="relative">
                   <Input
                     id="password-signup"
-                    name="password-signup"
+                    name="password"
                     type={showSignUpPassword ? "text" : "password"}
                     placeholder="Create a strong password"
                     required
