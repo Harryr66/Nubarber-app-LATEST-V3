@@ -119,8 +119,11 @@ export default function AuthForm() {
       // Use the auth context to login with user data
       login(userData.user);
       
-      // Redirect to dashboard
-      router.push('/dashboard');
+      // Add a small delay to ensure auth state is updated
+      setTimeout(() => {
+        // Redirect to dashboard
+        router.push('/dashboard');
+      }, 100);
     } catch (err: any) {
       // Handle specific error cases
       if (err.message.includes('Invalid email or password')) {
@@ -215,8 +218,11 @@ export default function AuthForm() {
       // Use the auth context to login with user data
       login(userData.user);
       
-      // Redirect to dashboard
-      router.push('/dashboard');
+      // Add a small delay to ensure auth state is updated
+      setTimeout(() => {
+        // Redirect to dashboard
+        router.push('/dashboard');
+      }, 100);
     } catch (err: any) {
       console.error('Signup error:', err);
       // Handle specific error cases
