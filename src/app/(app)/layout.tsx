@@ -11,6 +11,7 @@ import {
   Users,
   Globe,
   Contact,
+  LogOut,
 } from "lucide-react";
 
 import {
@@ -36,6 +37,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from "@/components/logo";
+import { useAuth } from "@/components/auth-provider";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
@@ -49,6 +51,12 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user, isLoading, logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    // Redirect will be handled by middleware
+  };
 
   return (
     <SidebarProvider>
@@ -80,9 +88,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <Button variant="ghost" className="justify-start gap-2 w-full px-2">
                         <Avatar className="h-8 w-8">
                             <AvatarImage src="/images/default-avatar.png" alt="User" data-ai-hint="user avatar" />
-                            <AvatarFallback>U</AvatarFallback>
+                            <AvatarFallback>
+                              {user?.shopName?.charAt(0) || 'U'}
+                            </AvatarFallback>
                         </Avatar>
-                        <span className="truncate">Loading...</span>
+                        <span className="truncate">
+                          {isLoading ? 'Loading...' : user?.shopName || 'Unknown'}
+                        </span>
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56 mb-2">
@@ -92,7 +104,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     <DropdownMenuItem>Billing</DropdownMenuItem>
                     <DropdownMenuItem>Settings</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>Log out</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Log out
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
           </SidebarFooter>

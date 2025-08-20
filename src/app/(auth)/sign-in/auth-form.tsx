@@ -99,14 +99,14 @@ export default function AuthForm() {
     }
     
     try {
-      // In production, this would make an API call to your backend
-      // For now, we'll simulate a secure authentication process
+      // Make API call to secure authentication endpoint
       const response = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
+        credentials: 'include', // Include cookies
       });
 
       if (!response.ok) {
@@ -116,19 +116,19 @@ export default function AuthForm() {
 
       const userData = await response.json();
       
-      // Use the auth context to login
-      login(email, userData.shopName);
+      // Use the auth context to login with user data
+      login(userData.user);
       
       // Redirect to dashboard
       router.push('/dashboard');
     } catch (err: any) {
       // Handle specific error cases
-      if (err.message.includes('Invalid credentials')) {
+      if (err.message.includes('Invalid email or password')) {
         setError("Invalid email or password. Please try again.");
       } else if (err.message.includes('Account not found')) {
         setError("No account found with this email address. Please sign up first.");
-      } else if (err.message.includes('Account locked')) {
-        setError("Account has been temporarily locked due to multiple failed attempts. Please try again later.");
+      } else if (err.message.includes('locked')) {
+        setError(err.message);
       } else {
         setError("Sign in failed. Please check your credentials and try again.");
       }
@@ -204,8 +204,8 @@ export default function AuthForm() {
 
       const userData = await response.json();
       
-      // Use the auth context to login with shop name
-      login(email, shopName);
+      // Use the auth context to login with user data
+      login(userData.user);
       
       // Redirect to dashboard
       router.push('/dashboard');

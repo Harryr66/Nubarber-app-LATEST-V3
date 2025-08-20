@@ -2,58 +2,88 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
+interface User {
+  id: string;
+  email: string;
+  shopName: string;
+  role: string;
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
-  userEmail: string | null;
-  shopName: string | null;
-  login: (email: string, shopName?: string) => void;
+  user: User | null;
+  isLoading: boolean;
+  login: (user: User) => void;
   logout: () => void;
+  checkAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [shopName, setShopName] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Check authentication status on mount
   useEffect(() => {
-    // Check localStorage on component mount
-    const auth = localStorage.getItem("isAuthenticated");
-    const email = localStorage.getItem("userEmail");
-    const shop = localStorage.getItem("shopName");
-    
-    if (auth === "true" && email) {
-      setIsAuthenticated(true);
-      setUserEmail(email);
-      setShopName(shop);
-    }
+    checkAuth();
   }, []);
 
-  const login = (email: string, shop?: string) => {
-    setIsAuthenticated(true);
-    setUserEmail(email);
-    setShopName(shop || null);
-    
-    localStorage.setItem("isAuthenticated", "true");
-    localStorage.setItem("userEmail", email);
-    if (shop) {
-      localStorage.setItem("shopName", shop);
+  const checkAuth = async () => {
+    try {
+      const response = await fetch('/api/auth/verify', {
+        method: 'GET',
+        credentials: 'include', // Include cookies
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData.user);
+        setIsAuthenticated(true);
+      } else {
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    setUserEmail(null);
-    setShopName(null);
-    
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("userEmail");
-    localStorage.removeItem("shopName");
+  const login = (userData: User) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+  };
+
+  const logout = async () => {
+    try {
+      // Call logout API to clear server-side session
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Clear local state regardless of API call success
+      setUser(null);
+      setIsAuthenticated(false);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userEmail, shopName, login, logout }}>
+    <AuthContext.Provider value={{ 
+      isAuthenticated, 
+      user, 
+      isLoading, 
+      login, 
+      logout, 
+      checkAuth 
+    }}>
       {children}
     </AuthContext.Provider>
   );

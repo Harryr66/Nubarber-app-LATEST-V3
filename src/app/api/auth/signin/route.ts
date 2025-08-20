@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-// In production, you would use a proper database and authentication service
-// This is a simplified example - replace with your actual auth logic
+import { AuthService, initializeDemoUser } from '@/lib/auth';
 
 interface SignInRequest {
   email: string;
@@ -10,6 +8,9 @@ interface SignInRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    // Initialize demo user on first request (remove in production)
+    await initializeDemoUser();
+
     const body: SignInRequest = await request.json();
     const { email, password } = body;
 
@@ -30,32 +31,60 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // In production, you would:
-    // 1. Hash the password and compare with stored hash
-    // 2. Check against your user database
-    // 3. Implement rate limiting
-    // 4. Add JWT token generation
-    // 5. Log authentication attempts
+    // Validate password presence
+    if (password.trim().length === 0) {
+      return NextResponse.json(
+        { message: 'Password is required' },
+        { status: 400 }
+      );
+    }
 
-    // For demo purposes, we'll simulate a successful login
-    // Replace this with your actual authentication logic
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+      // Authenticate user with secure service
+      const { user, token } = await AuthService.authenticateUser(email, password);
 
-    // Mock user data - replace with actual user lookup
-    const mockUser = {
-      id: 'user_123',
-      email: email,
-      shopName: 'Demo Barbershop',
-      role: 'owner'
-    };
+      // Set HTTP-only cookie with JWT token
+      const response = NextResponse.json({
+        success: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          shopName: user.shopName,
+          role: user.role
+        },
+        message: 'Authentication successful'
+      });
 
-    return NextResponse.json({
-      success: true,
-      user: mockUser,
-      message: 'Authentication successful'
-    });
+      // Set secure HTTP-only cookie
+      response.cookies.set('auth-token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60, // 24 hours
+        path: '/'
+      });
+
+      return response;
+
+    } catch (authError: any) {
+      // Handle specific authentication errors
+      if (authError.message.includes('Invalid credentials')) {
+        return NextResponse.json(
+          { message: 'Invalid email or password' },
+          { status: 401 }
+        );
+      } else if (authError.message.includes('locked')) {
+        return NextResponse.json(
+          { message: authError.message },
+          { status: 423 } // Locked
+        );
+      } else {
+        return NextResponse.json(
+          { message: authError.message },
+          { status: 401 }
+        );
+      }
+    }
 
   } catch (error) {
     console.error('Sign in error:', error);
