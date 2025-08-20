@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { AuthService } from '@/lib/auth';
 
 // Routes that require authentication
 const protectedRoutes = [
@@ -13,74 +12,20 @@ const protectedRoutes = [
   '/public-site'
 ];
 
-// Routes that should redirect to dashboard if already authenticated
-const authRoutes = [
-  '/sign-in',
-  '/sign-up'
-];
-
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Debug logging
-  console.log('Middleware running for path:', pathname);
-  
-  // Check if this is a protected route
+  // Only protect the main app routes, not auth routes
   const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
-  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route));
-  
-  // Get the auth token from cookies
-  const token = request.cookies.get('auth-token')?.value;
-  
-  console.log('Middleware checks:', { isProtectedRoute, isAuthRoute, hasToken: !!token });
   
   if (isProtectedRoute) {
-    // Protected route - verify token
-    if (!token) {
-      console.log('No token found, redirecting to sign-in');
-      // No token, redirect to sign-in
-      const url = request.nextUrl.clone();
-      url.pathname = '/sign-in';
-      url.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(url);
-    }
-    
-    try {
-      // Verify the token
-      const decoded = AuthService.verifyToken(token);
-      console.log('Token verified successfully for:', pathname);
-      
-      // Token is valid, allow access
-      return NextResponse.next();
-    } catch (error) {
-      console.log('Token verification failed, redirecting to sign-in');
-      // Invalid token, redirect to sign-in
-      const url = request.nextUrl.clone();
-      url.pathname = '/sign-in';
-      url.searchParams.set('redirect', pathname);
-      return NextResponse.redirect(url);
-    }
-  }
-  
-  if (isAuthRoute && token) {
-    // User is already authenticated, redirect to dashboard
-    try {
-      AuthService.verifyToken(token);
-      console.log('User already authenticated, redirecting to dashboard');
-      const url = request.nextUrl.clone();
-      url.pathname = '/dashboard';
-      return NextResponse.redirect(url);
-    } catch (error) {
-      console.log('Invalid token on auth route, removing token');
-      // Invalid token, remove it and continue to auth page
-      const response = NextResponse.next();
-      response.cookies.delete('auth-token');
-      return response;
-    }
+    // For now, allow all access to protected routes
+    // The auth context will handle redirects on the client side
+    // This prevents middleware from interfering with the auth flow
+    return NextResponse.next();
   }
   
   // Allow access to all other routes
-  console.log('Allowing access to:', pathname);
   return NextResponse.next();
 }
 

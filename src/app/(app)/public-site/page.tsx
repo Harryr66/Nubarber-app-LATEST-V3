@@ -127,25 +127,27 @@ export default function PublicSitePage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold font-heading">Public Site</h1>
-        <Button onClick={handleSaveChanges} disabled={isUploading}>
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h1 className="text-2xl md:text-3xl font-bold font-heading">Public Site</h1>
+        <Button onClick={handleSaveChanges} disabled={isUploading} className="w-full sm:w-auto">
           {isUploading ? "Saving..." : "Save Changes"}
         </Button>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         <div className="lg:col-span-2">
             <Card>
-                <CardHeader>
-                    <CardTitle>Customize Your Booking Page</CardTitle>
-                    <CardDescription>This is what your clients will see when they visit your booking page.</CardDescription>
+                <CardHeader className="pb-4 md:pb-6">
+                    <CardTitle className="text-lg md:text-xl">Customize Your Booking Page</CardTitle>
+                    <CardDescription className="text-sm md:text-base">
+                      This is what your clients will see when they visit your booking page.
+                    </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-8">
-                    <div className="space-y-2">
-                        <Label>Shop Logo</Label>
-                        <div className="flex items-center gap-4">
-                            <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center border overflow-hidden">
+                <CardContent className="space-y-6 md:space-y-8">
+                    <div className="space-y-3 md:space-y-4">
+                        <Label className="text-sm md:text-base">Shop Logo</Label>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center border overflow-hidden flex-shrink-0">
                                 {logoPreview ? (
                                   <Image 
                                     src={logoPreview} 
@@ -158,7 +160,7 @@ export default function PublicSitePage() {
                                   <ImageIcon className="h-8 w-8 text-gray-400" />
                                 )}
                             </div>
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 <input
                                   ref={fileInputRef}
                                   type="file"
@@ -170,6 +172,7 @@ export default function PublicSitePage() {
                                   variant="outline" 
                                   onClick={handleUploadClick}
                                   disabled={isUploading}
+                                  className="w-full sm:w-auto"
                                 >
                                   <Upload className="mr-2 h-4 w-4" /> 
                                   {logoFile ? "Change Logo" : "Upload Logo"}
@@ -179,14 +182,14 @@ export default function PublicSitePage() {
                                     variant="outline" 
                                     onClick={handleRemoveLogo}
                                     disabled={isUploading}
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 w-full sm:w-auto"
                                   >
                                     <X className="mr-2 h-4 w-4" /> Remove
                                   </Button>
                                 )}
                             </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs md:text-sm text-muted-foreground leading-tight">
                             Upload your shop logo (max 1MB). This will be displayed prominently on your public booking page.
                             <br />
                             Recommended: Square image, 500x500 pixels or smaller for best performance.
@@ -197,89 +200,90 @@ export default function PublicSitePage() {
                             )}
                         </p>
                     </div>
-                     <div className="space-y-2">
-                        <Label>Your Custom URL</Label>
+                     <div className="space-y-3 md:space-y-4">
+                        <Label className="text-sm md:text-base">Your Custom URL</Label>
                         <div className="space-y-3">
                           {/* White Label URL (Future) */}
-                          <div className="p-3 rounded-md bg-blue-50 border border-blue-200">
-                            <div className="flex items-center justify-between">
-                              <span className="text-lg font-mono font-semibold text-blue-900">{whiteLabelUrl}</span>
-                              <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full">Future</span>
+                          <div className="p-3 md:p-4 rounded-md bg-blue-50 border border-blue-200">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                              <span className="text-base md:text-lg font-mono font-semibold text-blue-900 break-all">{whiteLabelUrl}</span>
+                              <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full w-fit">Future</span>
                             </div>
-                            <p className="text-sm text-blue-700 mt-1">Your white-label domain (requires DNS setup)</p>
+                            <p className="text-xs md:text-sm text-blue-700 mt-1">Your white-label domain (requires DNS setup)</p>
                           </div>
                           
                           {/* Working URL (Current) */}
-                          <div className="p-3 rounded-md bg-green-50 border border-green-200">
-                            <div className="flex items-center justify-between">
-                              <span className="text-lg font-mono font-semibold text-green-900">{workingUrl}</span>
-                              <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full">Active</span>
+                          <div className="p-3 md:p-4 rounded-md bg-green-50 border border-green-200">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                              <span className="text-base md:text-lg font-mono font-semibold text-green-900 break-all">{workingUrl}</span>
+                              <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full w-fit">Active</span>
                             </div>
-                            <p className="text-sm text-green-700 mt-1">Your working booking page (ready to use now)</p>
+                            <p className="text-xs md:text-sm text-green-700 mt-1">Your working booking page (ready to use now)</p>
                           </div>
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs md:text-sm text-muted-foreground leading-tight">
                             <strong>White-label URL:</strong> Available once DNS is configured for .nubarber.com domain.<br/>
                             <strong>Working URL:</strong> Use this link immediately to share with customers.
                         </p>
                     </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="headline">Headline</Label>
+                     <div className="space-y-3 md:space-y-4">
+                        <Label htmlFor="headline" className="text-sm md:text-base">Headline</Label>
                         <Input 
                           id="headline" 
                           value={headline}
                           onChange={(e) => setHeadline(e.target.value)}
                           placeholder="Enter your headline"
+                          className="h-10 md:h-11 text-base"
                         />
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="description">Description</Label>
+                    <div className="space-y-3 md:space-y-4">
+                        <Label htmlFor="description" className="text-sm md:text-base">Description</Label>
                         <Textarea 
                           id="description" 
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
                           placeholder="Enter your description"
+                          className="min-h-[80px] md:min-h-[100px] text-base"
                         />
                     </div>
                 </CardContent>
             </Card>
         </div>
-        <div className="space-y-6">
+        <div className="space-y-4 md:space-y-6">
             <Card>
-                <CardHeader>
-                    <CardTitle>Your Booking URL</CardTitle>
-                    <CardDescription>Share this link with your clients.</CardDescription>
+                <CardHeader className="pb-4 md:pb-6">
+                    <CardTitle className="text-lg md:text-xl">Your Booking URL</CardTitle>
+                    <CardDescription className="text-sm md:text-base">Share this link with your clients.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-3">
                       {/* White Label URL */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-900">
-                        <p><strong>White-Label URL:</strong> {whiteLabelUrl}</p>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 md:p-4 text-xs md:text-sm text-blue-900">
+                        <p><strong>White-Label URL:</strong> <span className="break-all">{whiteLabelUrl}</span></p>
                         <p className="text-xs mt-1">Future domain (requires DNS setup)</p>
                       </div>
                       
                       {/* Working URL */}
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-900">
-                        <p><strong>Working URL:</strong> {workingUrl}</p>
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 md:p-4 text-xs md:text-sm text-green-900">
+                        <p><strong>Working URL:</strong> <span className="break-all">{workingUrl}</span></p>
                         <p className="text-xs mt-1">Ready to use now - share with customers</p>
                       </div>
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label>Copy Working URL</Label>
-                      <div className="flex items-center">
-                          <Input readOnly value={workingUrl} />
-                          <Button variant="ghost" size="icon" className="ml-2" onClick={handleCopyUrl}>
+                    <div className="space-y-3 md:space-y-4">
+                      <Label className="text-sm md:text-base">Copy Working URL</Label>
+                      <div className="flex flex-col sm:flex-row items-center gap-2">
+                          <Input readOnly value={workingUrl} className="h-10 md:h-11 text-sm" />
+                          <Button variant="ghost" size="icon" className="w-full sm:w-auto h-10 md:h-11" onClick={handleCopyUrl}>
                               <Copy className="h-4 w-4" />
                           </Button>
                       </div>
-                      <p className="text-xs text-muted-foreground text-center">
+                      <p className="text-xs md:text-sm text-muted-foreground text-center">
                         Copy this URL to share with your customers
                       </p>
                     </div>
                 </CardContent>
             </Card>
-
         </div>
       </div>
     </div>

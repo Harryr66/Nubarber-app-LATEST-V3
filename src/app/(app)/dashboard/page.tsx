@@ -1,3 +1,8 @@
+"use client";
+
+import { useAuth } from "@/components/auth-provider";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -38,50 +43,88 @@ const stats = [
 ]
 
 export default function Dashboard() {
+  const { isAuthenticated, user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    console.log('Dashboard: auth state:', { isAuthenticated, user, isLoading });
+    
+    if (!isLoading && !isAuthenticated) {
+      console.log('Dashboard: user not authenticated, redirecting to sign-in');
+      router.push('/sign-in');
+    }
+  }, [isAuthenticated, user, isLoading, router]);
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 md:space-y-6">
+        <h1 className="text-2xl md:text-3xl font-bold font-heading">Loading...</h1>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="space-y-4 md:space-y-6">
+        <h1 className="text-2xl md:text-3xl font-bold font-heading">Redirecting to sign-in...</h1>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold font-headline">Overview</h1>
-      <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
+      <div className="space-y-2">
+        <h1 className="text-2xl md:text-3xl font-bold font-heading">Overview</h1>
+        <p className="text-sm md:text-base text-muted-foreground">
+          Welcome back, {user?.shopName}!
+        </p>
+      </div>
+      
+      <div className="space-y-4 md:space-y-6">
         <Card>
-          <CardHeader>
-            <CardTitle>Today's Appointments</CardTitle>
-            <CardDescription>
+          <CardHeader className="pb-3 md:pb-6">
+            <CardTitle className="text-lg md:text-xl">Today's Appointments</CardTitle>
+            <CardDescription className="text-sm md:text-base">
               Your schedule for today is clear
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col items-center justify-center text-center py-12">
-              <CalendarOff className="h-12 w-12 text-muted-foreground" />
-              <h3 className="mt-4 text-lg font-semibold">No appointments scheduled for today</h3>
-              <p className="mt-2 text-sm text-muted-foreground">Your schedule for today is clear. Enjoy the downtime!</p>
+            <div className="flex flex-col items-center justify-center text-center py-8 md:py-12">
+              <CalendarOff className="h-8 w-8 md:h-12 md:w-12 text-muted-foreground" />
+              <h3 className="mt-3 md:mt-4 text-base md:text-lg font-semibold">No appointments scheduled for today</h3>
+              <p className="mt-1 md:mt-2 text-xs md:text-sm text-muted-foreground">Your schedule for today is clear. Enjoy the downtime!</p>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 md:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat, i) => (
-            <Card key={i}>
+            <Card key={i} className="p-3 md:p-6">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                <CardTitle className="text-xs md:text-sm font-medium">{stat.title}</CardTitle>
                 <stat.icon className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">{stat.description}</p>
+                <div className="text-xl md:text-2xl font-bold">{stat.value}</div>
+                <p className="text-xs text-muted-foreground leading-tight">{stat.description}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Bookings Overview</CardTitle>
-            <CardDescription>
+          <CardHeader className="pb-3 md:pb-6">
+            <CardTitle className="text-lg md:text-xl">Bookings Overview</CardTitle>
+            <CardDescription className="text-sm md:text-base">
               A chart showing total bookings per month for the last 6 months.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <BookingsChart />
+            <div className="overflow-x-auto">
+              <div className="min-w-[600px] md:min-w-0">
+                <BookingsChart />
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

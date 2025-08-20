@@ -119,11 +119,8 @@ export default function AuthForm() {
       // Use the auth context to login with user data
       login(userData.user);
       
-      // Add a small delay to ensure auth state is updated
-      setTimeout(() => {
-        // Redirect to dashboard
-        router.push('/dashboard');
-      }, 100);
+      // Redirect to dashboard immediately
+      router.push('/dashboard');
     } catch (err: any) {
       // Handle specific error cases
       if (err.message.includes('Invalid email or password')) {
@@ -218,11 +215,8 @@ export default function AuthForm() {
       // Use the auth context to login with user data
       login(userData.user);
       
-      // Add a small delay to ensure auth state is updated
-      setTimeout(() => {
-        // Redirect to dashboard
-        router.push('/dashboard');
-      }, 100);
+      // Redirect to dashboard immediately
+      router.push('/dashboard');
     } catch (err: any) {
       console.error('Signup error:', err);
       // Handle specific error cases
@@ -241,35 +235,35 @@ export default function AuthForm() {
   };
 
   return (
-    <Tabs defaultValue="sign-in" className="w-full max-w-md">
-      <Card>
-        <CardHeader className="text-center">
+    <Tabs defaultValue="sign-in" className="w-full max-w-md mx-auto">
+      <Card className="mx-4 md:mx-0">
+        <CardHeader className="text-center px-4 md:px-6">
           <div className="mb-4 flex justify-center">
             <Logo />
           </div>
-          <CardTitle className="font-headline text-2xl font-bold">
+          <CardTitle className="font-heading text-xl md:text-2xl font-bold">
             Welcome to NuBarber
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-sm md:text-base">
             Sign in to your account or create a new one to get started
           </CardDescription>
           <TabsList className="grid w-full grid-cols-2 mt-4">
-            <TabsTrigger value="sign-in">Sign In</TabsTrigger>
-            <TabsTrigger value="sign-up">Sign Up</TabsTrigger>
+            <TabsTrigger value="sign-in" className="text-sm md:text-base">Sign In</TabsTrigger>
+            <TabsTrigger value="sign-up" className="text-sm md:text-base">Sign Up</TabsTrigger>
           </TabsList>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 md:px-6 pb-6">
           {error && (
             <div className="mb-4 p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md flex items-start gap-2">
               <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-              <div className="whitespace-pre-line">{error}</div>
+              <div className="whitespace-pre-line text-xs md:text-sm">{error}</div>
             </div>
           )}
           
           <TabsContent value="sign-in">
-            <form onSubmit={handleSignIn} className="grid gap-4">
+            <form onSubmit={handleSignIn} className="grid gap-3 md:gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="email" className="text-sm md:text-base">Email Address</Label>
                 <Input
                   id="email"
                   name="email"
@@ -277,11 +271,11 @@ export default function AuthForm() {
                   placeholder="your@email.com"
                   required
                   disabled={isLoading}
-                  className="h-10"
+                  className="h-10 md:h-11 text-base"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-sm md:text-base">Password</Label>
                 <div className="relative">
                   <Input 
                     id="password" 
@@ -290,13 +284,13 @@ export default function AuthForm() {
                     placeholder="Enter your password" 
                     required 
                     disabled={isLoading}
-                    className="h-10 pr-10"
+                    className="h-10 md:h-11 text-base pr-10"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-10 px-3 py-2 hover:bg-transparent"
+                    className="absolute right-0 top-0 h-10 md:h-11 px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                     disabled={isLoading}
                   >
@@ -308,19 +302,19 @@ export default function AuthForm() {
                   </Button>
                 </div>
               </div>
-              <Button type="submit" className="w-full mt-2 h-10" disabled={isLoading}>
+              <Button type="submit" className="w-full mt-2 h-10 md:h-11 text-base" disabled={isLoading}>
                 {isLoading ? "Signing In..." : "Sign In"}
               </Button>
-              <div className="text-xs text-gray-500 text-center">
+              <div className="text-xs md:text-sm text-gray-500 text-center">
                 Forgot your password? Contact support for assistance
               </div>
             </form>
           </TabsContent>
           
           <TabsContent value="sign-up">
-            <form onSubmit={handleSignUp} className="grid gap-4">
+            <form onSubmit={handleSignUp} className="grid gap-3 md:gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email-signup">Email Address</Label>
+                <Label htmlFor="email-signup" className="text-sm md:text-base">Email Address</Label>
                 <Input
                   id="email-signup"
                   name="email"
@@ -328,11 +322,11 @@ export default function AuthForm() {
                   placeholder="your@email.com"
                   required
                   disabled={isLoading}
-                  className="h-10"
+                  className="h-10 md:h-11 text-base"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password-signup">Password</Label>
+                <Label htmlFor="password-signup" className="text-sm md:text-base">Password</Label>
                 <div className="relative">
                   <Input
                     id="password-signup"
@@ -341,13 +335,13 @@ export default function AuthForm() {
                     placeholder="Create a strong password"
                     required
                     disabled={isLoading}
-                    className="h-10 pr-10"
+                    className="h-10 md:h-11 text-base pr-10"
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-10 px-3 py-2 hover:bg-transparent"
+                    className="absolute right-0 top-0 h-10 md:h-11 px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowSignUpPassword(!showSignUpPassword)}
                     disabled={isLoading}
                   >
@@ -358,38 +352,38 @@ export default function AuthForm() {
                     )}
                   </Button>
                 </div>
-                <div className="text-xs text-gray-500">
+                <div className="text-xs text-gray-500 leading-tight">
                   Password must be at least 8 characters with uppercase, lowercase, number, and special character
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="shop-name">Shop Name</Label>
+                <Label htmlFor="shop-name" className="text-sm md:text-base">Shop Name</Label>
                 <Input
                   id="shop-name"
                   name="shop-name"
                   placeholder="e.g. The Modern Cut"
                   required
                   disabled={isLoading}
-                  className="h-10"
+                  className="h-10 md:h-11 text-base"
                 />
               </div>
               <div className="space-y-2">
-                <Label>Location Type</Label>
+                <Label className="text-sm md:text-base">Location Type</Label>
                 <RadioGroup
                   defaultValue="physical"
-                  className="flex gap-4"
+                  className="flex flex-col sm:flex-row gap-3 sm:gap-4"
                   onValueChange={setLocationType}
                   disabled={isLoading}
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="physical" id="physical" />
-                    <Label htmlFor="physical" className="font-normal">
+                    <Label htmlFor="physical" className="font-normal text-sm md:text-base">
                       Physical Location
                     </Label>
                   </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="mobile" id="mobile" />
-                    <Label htmlFor="mobile" className="font-normal">
+                    <Label htmlFor="mobile" className="font-normal text-sm md:text-base">
                       Mobile Barber
                     </Label>
                   </div>
@@ -397,19 +391,19 @@ export default function AuthForm() {
               </div>
               {locationType === "physical" && (
                 <div className="grid gap-2">
-                  <Label htmlFor="business-address">Business Address</Label>
+                  <Label htmlFor="business-address" className="text-sm md:text-base">Business Address</Label>
                   <Input
                     id="business-address"
                     name="business-address"
                     placeholder="123 Main St, Anytown, USA"
                     required
                     disabled={isLoading}
-                    className="h-10"
+                    className="h-10 md:h-11 text-base"
                   />
                 </div>
               )}
                <div className="grid gap-2">
-                <Label htmlFor="staff-count">How many staff members?</Label>
+                <Label htmlFor="staff-count" className="text-sm md:text-base">How many staff members?</Label>
                 <Input
                   id="staff-count"
                   name="staff-count"
@@ -420,12 +414,12 @@ export default function AuthForm() {
                   onChange={handleStaffCountChange}
                   required
                   disabled={isLoading}
-                  className="h-10"
+                  className="h-10 md:h-11 text-base"
                 />
               </div>
               {staffCount > 0 && (
                 <div className="grid gap-2">
-                  <Label>Staff Member Names</Label>
+                  <Label className="text-sm md:text-base">Staff Member Names</Label>
                   {Array.from({ length: staffCount }, (_, i) => (
                     <Input
                       key={i}
@@ -434,16 +428,16 @@ export default function AuthForm() {
                       placeholder={`Staff Member ${i + 1}`}
                       required
                       disabled={isLoading}
-                      className="h-10"
+                      className="h-10 md:h-11 text-base"
                     />
                   ))}
                 </div>
               )}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-3 md:gap-4 grid-cols-1 sm:grid-cols-2">
                  <div className="grid gap-2">
-                    <Label htmlFor="business-region">Business Region</Label>
+                    <Label htmlFor="business-region" className="text-sm md:text-base">Business Region</Label>
                     <Select defaultValue="usa" disabled={isLoading}>
-                        <SelectTrigger id="business-region" className="h-10">
+                        <SelectTrigger id="business-region" className="h-10 md:h-11 text-base">
                             <SelectValue placeholder="Select region" />
                         </SelectTrigger>
                         <SelectContent>
@@ -457,9 +451,9 @@ export default function AuthForm() {
                     </Select>
                  </div>
                  <div className="grid gap-2">
-                    <Label htmlFor="currency">Currency</Label>
+                    <Label htmlFor="currency" className="text-sm md:text-base">Currency</Label>
                     <Select defaultValue="usd" disabled={isLoading}>
-                        <SelectTrigger id="currency" className="h-10">
+                        <SelectTrigger id="currency" className="h-10 md:h-11 text-base">
                             <SelectValue placeholder="Select currency" />
                         </SelectTrigger>
                         <SelectContent>
@@ -472,10 +466,10 @@ export default function AuthForm() {
                     </Select>
                  </div>
               </div>
-              <Button type="submit" className="w-full mt-2 h-10" disabled={isLoading}>
+              <Button type="submit" className="w-full mt-2 h-10 md:h-11 text-base" disabled={isLoading}>
                 {isLoading ? "Creating Account..." : "Create Account"}
               </Button>
-              <div className="text-xs text-gray-500 text-center">
+              <div className="text-xs md:text-sm text-gray-500 text-center leading-tight">
                 By creating an account, you agree to our Terms of Service and Privacy Policy
               </div>
             </form>

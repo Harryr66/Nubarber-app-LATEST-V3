@@ -55,8 +55,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const login = (userData: User) => {
+    console.log('AuthProvider: login called with user data:', userData);
     setUser(userData);
     setIsAuthenticated(true);
+    console.log('AuthProvider: auth state updated');
   };
 
   const logout = async () => {

@@ -12,6 +12,7 @@ import {
   Globe,
   Contact,
   LogOut,
+  X,
 } from "lucide-react";
 
 import {
@@ -38,6 +39,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from "@/components/logo";
 import { useAuth } from "@/components/auth-provider";
+import { useState } from "react";
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Overview" },
@@ -52,6 +54,7 @@ const navItems = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { user, isLoading, logout } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -61,7 +64,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen">
-        <Sidebar>
+        {/* Desktop Sidebar */}
+        <Sidebar className="hidden md:flex">
           <SidebarHeader>
             <Logo />
           </SidebarHeader>
@@ -74,7 +78,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     isActive={pathname === item.href || (item.href === "/dashboard" && pathname === "/")}
                   >
                     <Link href={item.href}>
-                      <item.icon />
+                      <item.icon className="h-5 w-5" />
                       <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -113,16 +117,96 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarFooter>
         </Sidebar>
 
+        {/* Mobile Sidebar Overlay */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)} />
+            <div className="fixed left-0 top-0 h-full w-80 bg-white shadow-xl">
+              <div className="flex h-full flex-col">
+                <div className="flex items-center justify-between p-4 border-b">
+                  <Logo />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+                
+                <div className="flex-1 p-4">
+                  <nav className="space-y-2">
+                    {navItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                          pathname === item.href || (item.href === "/dashboard" && pathname === "/")
+                            ? "bg-primary text-primary-foreground"
+                            : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        }`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        {item.label}
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
+                
+                <div className="p-4 border-t">
+                  <div className="flex items-center gap-3 px-3 py-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="/images/default-avatar.png" alt="User" />
+                      <AvatarFallback>
+                        {user?.shopName?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {isLoading ? 'Loading...' : user?.shopName || 'Unknown'}
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-start mt-2"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log out
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <SidebarInset>
           <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 md:justify-end">
-            <SidebarTrigger className="md:hidden">
-              <Menu />
-            </SidebarTrigger>
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="md:hidden">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsMobileMenuOpen(true)}
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SidebarTrigger>
+              <div className="md:hidden">
+                <Logo />
+              </div>
+            </div>
             <div className="hidden md:block">
               {/* Desktop header content can go here if needed */}
             </div>
           </header>
-          <main className="flex-1 p-4 md:p-6">{children}</main>
+          <main className="flex-1 p-4 md:p-6">
+            <div className="max-w-7xl mx-auto">
+              {children}
+            </div>
+          </main>
         </SidebarInset>
       </div>
     </SidebarProvider>
