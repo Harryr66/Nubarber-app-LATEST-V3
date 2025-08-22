@@ -176,7 +176,7 @@ export default function AuthForm() {
     }
     
     try {
-      // Use the working simple signup endpoint
+      // Use the working local signup endpoint
       const requestBody = { 
         email, 
         password, 
@@ -187,9 +187,9 @@ export default function AuthForm() {
         country
       };
       
-      console.log('Sending signup request to simple endpoint:', requestBody);
+      console.log('Sending signup request to local endpoint:', requestBody);
       
-      const response = await fetch('/api/auth/simple-signup', {
+      const response = await fetch('/api/auth/local-signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
