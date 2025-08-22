@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
       email: email.toLowerCase(),
       shopName,
       locationType,
-      businessAddress,
-      staffCount,
+      businessAddress: businessAddress || '', // Ensure it's never undefined
+      staffCount: Number(staffCount),
       region: country,
       currency: 'USD',
       timezone: 'UTC',
