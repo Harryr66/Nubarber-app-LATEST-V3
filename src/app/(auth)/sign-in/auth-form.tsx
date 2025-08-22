@@ -30,6 +30,10 @@ import { useState } from 'react';
 export default function AuthForm() {
   const router = useRouter();
   const { login } = useAuth();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [shopName, setShopName] = useState("");
+  const [businessAddress, setBusinessAddress] = useState("");
   const [staffCount, setStaffCount] = React.useState(1);
   const [locationType, setLocationType] = React.useState("physical");
   const [isLoading, setIsLoading] = React.useState(false);
@@ -141,42 +145,25 @@ export default function AuthForm() {
   
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
+    setError("");
 
-    const formData = new FormData(e.target as HTMLFormElement);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const shopName = formData.get("shop-name") as string;
-    const businessAddress = formData.get("business-address") as string;
-    
-    // Production validation
-    if (!email || !password || !shopName) {
+    // Validate required fields
+    if (!email || !password || !shopName || !locationType || !staffCount || !country) {
       setError("Please fill in all required fields");
       setIsLoading(false);
       return;
     }
 
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address");
+    // Validate password strength
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long");
       setIsLoading(false);
       return;
     }
 
-    const passwordValidation = validatePassword(password);
-    if (!passwordValidation.isValid) {
-      setError(`Password requirements not met:\n${passwordValidation.errors.join('\n')}`);
-      setIsLoading(false);
-      return;
-    }
-
-    if (shopName.trim().length < 2) {
-      setError("Shop name must be at least 2 characters long");
-      setIsLoading(false);
-      return;
-    }
-
-    if (locationType === "physical" && !businessAddress?.trim()) {
+    // Validate business address for physical locations
+    if (locationType === 'physical' && (!businessAddress || businessAddress.trim().length === 0)) {
       setError("Business address is required for physical locations");
       setIsLoading(false);
       return;
@@ -189,7 +176,7 @@ export default function AuthForm() {
     }
     
     try {
-      // In production, this would make an API call to your backend
+      // Use the working simple signup endpoint
       const requestBody = { 
         email, 
         password, 
@@ -200,9 +187,9 @@ export default function AuthForm() {
         country
       };
       
-      console.log('Sending signup request:', requestBody);
+      console.log('Sending signup request to simple endpoint:', requestBody);
       
-      const response = await fetch('/api/auth/signup', {
+      const response = await fetch('/api/auth/simple-signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -326,9 +313,11 @@ export default function AuthForm() {
                 <Label htmlFor="email-signup" className="text-sm md:text-base">Email Address</Label>
                 <Input
                   id="email-signup"
-                  name="email"
+                  name="email-signup"
                   type="email"
                   placeholder="your@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   disabled={isLoading}
                   className="h-10 md:h-11 text-base"
@@ -337,12 +326,14 @@ export default function AuthForm() {
               <div className="grid gap-2">
                 <Label htmlFor="password-signup" className="text-sm md:text-base">Password</Label>
                 <div className="relative">
-                  <Input
-                    id="password-signup"
-                    name="password"
+                  <Input 
+                    id="password-signup" 
+                    name="password-signup"
                     type={showSignUpPassword ? "text" : "password"}
-                    placeholder="Create a strong password"
-                    required
+                    placeholder="Create a strong password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required 
                     disabled={isLoading}
                     className="h-10 md:h-11 text-base pr-10"
                   />
@@ -350,7 +341,7 @@ export default function AuthForm() {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-10 md:h-11 px-3 py-2 hover:bg-transparent"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowSignUpPassword(!showSignUpPassword)}
                     disabled={isLoading}
                   >
@@ -371,6 +362,8 @@ export default function AuthForm() {
                   id="shop-name"
                   name="shop-name"
                   placeholder="e.g. The Modern Cut"
+                  value={shopName}
+                  onChange={(e) => setShopName(e.target.value)}
                   required
                   disabled={isLoading}
                   className="h-10 md:h-11 text-base"
@@ -379,7 +372,7 @@ export default function AuthForm() {
               <div className="space-y-2">
                 <Label className="text-sm md:text-base">Location Type</Label>
                 <RadioGroup
-                  defaultValue="physical"
+                  value={locationType}
                   className="flex flex-col sm:flex-row gap-3 sm:gap-4"
                   onValueChange={setLocationType}
                   disabled={isLoading}
@@ -405,6 +398,8 @@ export default function AuthForm() {
                     id="business-address"
                     name="business-address"
                     placeholder="123 Main St, Anytown, USA"
+                    value={businessAddress}
+                    onChange={(e) => setBusinessAddress(e.target.value)}
                     required
                     disabled={isLoading}
                     className="h-10 md:h-11 text-base"
