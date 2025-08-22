@@ -191,7 +191,7 @@ export default function AuthForm() {
     }
     
     try {
-      // Use the working local signup endpoint
+      // Use the Firebase-backed signup endpoint
       const requestBody = { 
         email, 
         password, 
@@ -199,14 +199,13 @@ export default function AuthForm() {
         locationType,
         businessAddress,
         staffCount,
-        country,
-        forceCreate: true // Force create even if user exists
+        country
       };
       
-      console.log('📤 Sending signup request to local endpoint:', requestBody);
-      console.log('🌐 Endpoint URL: /api/auth/local-signup');
+      console.log('📤 Sending signup request to Firebase endpoint:', requestBody);
+      console.log('🌐 Endpoint URL: /api/auth/signup');
       
-      const response = await fetch('/api/auth/local-signup', {
+      const response = await fetch('/api/auth/signup', { // Reverted endpoint
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
