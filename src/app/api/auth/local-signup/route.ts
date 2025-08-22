@@ -7,9 +7,9 @@ const tempUsers = new Map();
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, shopName, locationType, businessAddress, staffCount, country } = body;
+    const { email, password, shopName, locationType, businessAddress, staffCount, country, forceCreate } = body;
 
-    console.log('🧪 Local signup attempt:', { email, shopName, country });
+    console.log('🧪 Local signup attempt:', { email, shopName, country, forceCreate });
 
     // Basic validation
     if (!email || !password || !shopName || !locationType || !staffCount || !country) {
@@ -21,10 +21,21 @@ export async function POST(request: NextRequest) {
 
     // Check if user already exists
     if (tempUsers.has(email.toLowerCase())) {
-      return NextResponse.json(
-        { error: 'An account with this email already exists' },
-        { status: 409 }
-      );
+      console.log('⚠️ User already exists:', email.toLowerCase());
+      
+      // If forceCreate is true, remove the existing user and create a new one
+      if (forceCreate) {
+        console.log('🔄 Force creating new account, removing existing user');
+        tempUsers.delete(email.toLowerCase());
+      } else {
+        return NextResponse.json(
+          { 
+            error: 'An account with this email already exists',
+            suggestion: 'Use forceCreate: true to overwrite existing account'
+          },
+          { status: 409 }
+        );
+      }
     }
 
     // Hash password
@@ -99,9 +110,13 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('❌ Local signup failed:', error);
     
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error during local signup';
+    const errorDetails = error instanceof Error ? error.stack : 'No stack trace available';
+
     return NextResponse.json({
-      error: `Local signup failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      details: error instanceof Error ? error.stack : 'No stack trace'
+      error: `Local signup failed: ${errorMessage}`,
+      details: errorDetails,
+      rawError: JSON.stringify(error) // Added for more context
     }, { status: 500 });
   }
 }
@@ -112,5 +127,15 @@ export async function GET() {
     message: 'Local users storage status',
     userCount: tempUsers.size,
     users: Array.from(tempUsers.keys())
+  });
+}
+
+// DELETE endpoint to clear all users (for testing)
+export async function DELETE() {
+  const userCount = tempUsers.size;
+  tempUsers.clear();
+  return NextResponse.json({
+    message: `Cleared ${userCount} users from local storage`,
+    userCount: 0
   });
 } 

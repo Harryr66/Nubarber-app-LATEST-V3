@@ -199,7 +199,8 @@ export default function AuthForm() {
         locationType,
         businessAddress,
         staffCount,
-        country
+        country,
+        forceCreate: true // Force create even if user exists
       };
       
       console.log('📤 Sending signup request to local endpoint:', requestBody);
