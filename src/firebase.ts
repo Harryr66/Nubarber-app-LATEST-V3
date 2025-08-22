@@ -11,6 +11,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
+
+// Initialize Firebase services
 export const auth = getAuth(app);
-export const db = getFirestore(app); 
+export const db = getFirestore(app);
+
+// Log configuration for debugging (remove in production)
+if (process.env.NODE_ENV === 'development') {
+  console.log('Firebase initialized with project:', firebaseConfig.projectId);
+  console.log('Available regions:', ['default', 'nubarber-uk', 'nubarber-canada', 'nubarber-aus', 'nubarber-eu']);
+} 

@@ -1,22 +1,8 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-
-// In production, this would be a proper database
-// For now, we'll use an in-memory store that resets on server restart
-interface User {
-  id: string;
-  email: string;
-  passwordHash: string;
-  shopName: string;
-  role: 'owner' | 'staff';
-  createdAt: Date;
-  lastLogin?: Date;
-  failedAttempts: number;
-  lockedUntil?: Date;
-}
-
-// In-memory user store (replace with database in production)
-const users: Map<string, User> = new Map();
+import { doc, setDoc, getDoc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { db } from '@/firebase';
+import { FirestoreService, User } from './firestore';
 
 // JWT secret - in production, use a strong secret from environment variables
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
@@ -28,9 +14,11 @@ const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
 
 export class AuthService {
   // Create a new user account
-  static async createUser(email: string, password: string, shopName: string, locationType: string, businessAddress?: string, staffCount: number = 1): Promise<Omit<User, 'passwordHash'>> {
+  static async createUser(email: string, password: string, shopName: string, locationType: string, businessAddress?: string, staffCount: number = 1, countryCode: string = 'US'): Promise<User> {
     // Check if user already exists
-    if (users.has(email.toLowerCase())) {
+    const region = FirestoreService.getRegionFromCountry(countryCode);
+    const existingUser = await FirestoreService.getUser(email, region);
+    if (existingUser) {
       throw new Error('User with this email already exists');
     }
 
@@ -43,86 +31,111 @@ export class AuthService {
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    const user: User = {
-      id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    // Determine region and currency based on country
+    const regionalConfig = FirestoreService.getRegionalConfig(region);
+
+    // Create user in Firestore
+    const userData = {
       email: email.toLowerCase(),
-      passwordHash,
       shopName,
-      role: 'owner',
-      createdAt: new Date(),
-      failedAttempts: 0
+      locationType: locationType as 'physical' | 'mobile',
+      businessAddress,
+      staffCount,
+      region,
+      currency: regionalConfig.currency,
+      timezone: regionalConfig.timezone,
+      stripeCurrency: regionalConfig.stripeCurrency,
+      isActive: true,
+      settings: {
+        businessHours: {
+          monday: { open: '09:00', close: '17:00', closed: false },
+          tuesday: { open: '09:00', close: '17:00', closed: false },
+          wednesday: { open: '09:00', close: '17:00', closed: false },
+          thursday: { open: '09:00', close: '17:00', closed: false },
+          friday: { open: '09:00', close: '17:00', closed: false },
+          saturday: { open: '09:00', close: '17:00', closed: false },
+          sunday: { open: '09:00', close: '17:00', closed: true }
+        },
+        notifications: {
+          emailNotifications: true,
+          smsNotifications: false,
+          appointmentReminders: true,
+          marketingEmails: false
+        },
+        branding: {
+          primaryColor: '#000000',
+          secondaryColor: '#ffffff'
+        }
+      }
     };
 
-    users.set(email.toLowerCase(), user);
+    const user = await FirestoreService.createUser(userData);
+
+    // Store password hash separately (you might want to use Firebase Auth instead)
+    // For now, we'll store it in a separate collection or use Firebase Auth
+    const passwordRef = doc(db, `${regionalConfig.region}/passwords`, email);
+    await setDoc(passwordRef, { passwordHash });
 
     // Return user without password hash
-    const { passwordHash: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return user;
   }
 
   // Authenticate user login
-  static async authenticateUser(email: string, password: string): Promise<{ user: Omit<User, 'passwordHash'>; token: string }> {
-    const user = users.get(email.toLowerCase());
+  static async authenticateUser(email: string, password: string, countryCode: string = 'US'): Promise<{ user: any; token: string }> {
+    const region = FirestoreService.getRegionFromCountry(countryCode);
     
+    // Get user from Firestore
+    const user = await FirestoreService.getUser(email, region);
     if (!user) {
       throw new Error('Invalid credentials');
     }
 
-    // Check if account is locked
-    if (user.lockedUntil && user.lockedUntil > new Date()) {
-      const remainingTime = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 1000 / 60);
-      throw new Error(`Account is locked. Please try again in ${remainingTime} minutes`);
-    }
-
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    // Get password hash from Firestore
+    const passwordRef = doc(db, `${region}/passwords`, email);
+    const passwordSnap = await getDoc(passwordRef);
     
-    if (!isPasswordValid) {
-      // Increment failed attempts
-      user.failedAttempts++;
-      
-      // Lock account if too many failed attempts
-      if (user.failedAttempts >= MAX_FAILED_ATTEMPTS) {
-        user.lockedUntil = new Date(Date.now() + LOCKOUT_DURATION);
-        users.set(email.toLowerCase(), user);
-        throw new Error('Too many failed attempts. Account locked for 15 minutes');
-      }
-      
-      users.set(email.toLowerCase(), user);
+    if (!passwordSnap.exists()) {
       throw new Error('Invalid credentials');
     }
 
-    // Reset failed attempts on successful login
-    user.failedAttempts = 0;
-    user.lastLogin = new Date();
-    users.set(email.toLowerCase(), user);
+    const { passwordHash } = passwordSnap.data();
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, passwordHash);
+    if (!isPasswordValid) {
+      throw new Error('Invalid credentials');
+    }
+
+    // Update last login
+    await FirestoreService.updateUser(email, { lastLogin: serverTimestamp() as Timestamp }, region);
 
     // Generate JWT token
     const token = jwt.sign(
       { 
         userId: user.id, 
         email: user.email, 
-        role: user.role,
-        shopName: user.shopName 
+        role: 'owner',
+        shopName: user.shopName,
+        region: user.region
       },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRES_IN }
     );
 
     // Return user without password hash and token
-    const { passwordHash: _, ...userWithoutPassword } = user;
-    return { user: userWithoutPassword, token };
+    return { user, token };
   }
 
   // Verify JWT token
-  static verifyToken(token: string): { userId: string; email: string; role: string; shopName: string } {
+  static verifyToken(token: string): { userId: string; email: string; role: string; shopName: string; region: string } {
     try {
       const decoded = jwt.verify(token, JWT_SECRET) as any;
       return {
         userId: decoded.userId,
         email: decoded.email,
         role: decoded.role,
-        shopName: decoded.shopName
+        shopName: decoded.shopName,
+        region: decoded.region
       };
     } catch (error) {
       throw new Error('Invalid or expired token');
@@ -130,34 +143,36 @@ export class AuthService {
   }
 
   // Get user by email (without password)
-  static getUserByEmail(email: string): Omit<User, 'passwordHash'> | null {
-    const user = users.get(email.toLowerCase());
-    if (!user) return null;
-    
-    const { passwordHash: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+  static async getUserByEmail(email: string, region: string = 'default'): Promise<any | null> {
+    return await FirestoreService.getUser(email, region as any);
   }
 
   // Get user by ID (without password)
-  static getUserById(id: string): Omit<User, 'passwordHash'> | null {
-    for (const user of users.values()) {
-      if (user.id === id) {
-        const { passwordHash: _, ...userWithoutPassword } = user;
-        return userWithoutPassword;
-      }
-    }
-    return null;
+  static async getUserById(id: string, region: string = 'default'): Promise<any | null> {
+    // In Firestore, we use email as ID, so this is the same as getUserByEmail
+    return await FirestoreService.getUser(id, region as any);
   }
 
   // Change password
-  static async changePassword(email: string, currentPassword: string, newPassword: string): Promise<boolean> {
-    const user = users.get(email.toLowerCase());
+  static async changePassword(email: string, currentPassword: string, newPassword: string, region: string = 'default'): Promise<boolean> {
+    const user = await FirestoreService.getUser(email, region as any);
     if (!user) {
       throw new Error('User not found');
     }
 
+    // Get current password hash
+    const passwordRef = doc(db, `${region}/passwords`, email);
+    const passwordSnap = await getDoc(passwordRef);
+    
+    if (!passwordSnap.exists()) {
+      throw new Error('Password not found');
+    }
+
     // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    const { passwordHash: currentHash } = passwordSnap.data();
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, currentHash);
     if (!isCurrentPasswordValid) {
       throw new Error('Current password is incorrect');
     }
@@ -169,20 +184,11 @@ export class AuthService {
 
     // Hash new password
     const saltRounds = 12;
-    user.passwordHash = await bcrypt.hash(newPassword, saltRounds);
-    users.set(email.toLowerCase(), user);
+    const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
 
-    return true;
-  }
+    // Update password hash
+    await updateDoc(passwordRef, { passwordHash: newPasswordHash });
 
-  // Reset failed attempts (for admin use)
-  static resetFailedAttempts(email: string): boolean {
-    const user = users.get(email.toLowerCase());
-    if (!user) return false;
-    
-    user.failedAttempts = 0;
-    user.lockedUntil = undefined;
-    users.set(email.toLowerCase(), user);
     return true;
   }
 }
@@ -196,7 +202,8 @@ export const initializeDemoUser = async () => {
       'Demo Barbershop',
       'physical',
       '123 Demo Street, Demo City',
-      2
+      2,
+      'US'
     );
     console.log('Demo user created successfully');
   } catch (error) {

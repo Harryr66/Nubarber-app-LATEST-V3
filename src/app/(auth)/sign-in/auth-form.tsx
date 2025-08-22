@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/components/auth-provider";
 import { AlertCircle, Eye, EyeOff } from "lucide-react";
+import { useState } from 'react';
 
 export default function AuthForm() {
   const router = useRouter();
@@ -35,6 +36,7 @@ export default function AuthForm() {
   const [error, setError] = React.useState("");
   const [showPassword, setShowPassword] = React.useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = React.useState(false);
+  const [country, setCountry] = useState('US');
 
   const handleStaffCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const count = parseInt(e.target.value, 10);
@@ -139,9 +141,9 @@ export default function AuthForm() {
   
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     setIsLoading(true);
-    setError("");
-    
+
     const formData = new FormData(e.target as HTMLFormElement);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
@@ -179,6 +181,12 @@ export default function AuthForm() {
       setIsLoading(false);
       return;
     }
+
+    if (!staffCount || staffCount < 1 || staffCount > 100) {
+      setError('Staff count must be between 1 and 100');
+      setIsLoading(false);
+      return;
+    }
     
     try {
       // In production, this would make an API call to your backend
@@ -188,7 +196,8 @@ export default function AuthForm() {
         shopName, 
         locationType,
         businessAddress,
-        staffCount 
+        staffCount,
+        country
       };
       
       console.log('Sending signup request:', requestBody);
@@ -465,6 +474,24 @@ export default function AuthForm() {
                         </SelectContent>
                     </Select>
                  </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="country" className="text-sm md:text-base">Country</Label>
+                <Select value={country} onValueChange={setCountry}>
+                  <SelectTrigger className="h-10 md:h-11 text-base">
+                    <SelectValue placeholder="Select your country" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="US">United States (USD)</SelectItem>
+                    <SelectItem value="UK">United Kingdom (GBP)</SelectItem>
+                    <SelectItem value="CA">Canada (CAD)</SelectItem>
+                    <SelectItem value="AU">Australia (AUD)</SelectItem>
+                    <SelectItem value="EU">European Union (EUR)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  This determines your regional database location and currency
+                </p>
               </div>
               <Button type="submit" className="w-full mt-2 h-10 md:h-11 text-base" disabled={isLoading}>
                 {isLoading ? "Creating Account..." : "Create Account"}

@@ -21,12 +21,21 @@ export default function PublicPage({ params }: PublicPageProps) {
   const [customerPhone, setCustomerPhone] = useState("");
   const [selectedService, setSelectedService] = useState("");
   const [isBooking, setIsBooking] = useState(false);
+  const [logoUrl, setLogoUrl] = useState<string>("/images/default-avatar.png");
+
+  // Load uploaded logo from localStorage
+  useEffect(() => {
+    const storedLogo = localStorage.getItem('nubarber_logo');
+    if (storedLogo) {
+      setLogoUrl(storedLogo);
+    }
+  }, []);
 
   // Mock business data - in production this would come from your database
   const businessData = {
     name: "Harrys Barbers",
     slug: params.slug,
-    logo: "/images/default-avatar.png", // Default logo
+    logo: logoUrl, // Use the uploaded logo
     description: "Professional barber services with attention to detail and style",
     address: "123 Main Street, Anytown, USA",
     phone: "+1 (555) 123-4567",
@@ -99,13 +108,13 @@ export default function PublicPage({ params }: PublicPageProps) {
       if (capacity === 0) {
         colorClass = 'bg-gray-300 text-gray-600';
         status = 'Closed';
-      } else if (capacity <= 25) {
+      } else if (capacity < 30) {
         colorClass = 'bg-red-500 text-white';
         status = 'Limited';
-      } else if (capacity <= 50) {
+      } else if (capacity < 60) {
         colorClass = 'bg-orange-500 text-white';
         status = 'Moderate';
-      } else if (capacity <= 75) {
+      } else if (capacity < 80) {
         colorClass = 'bg-green-400 text-black';
         status = 'Good';
       } else {
@@ -118,11 +127,7 @@ export default function PublicPage({ params }: PublicPageProps) {
         capacity,
         colorClass,
         status,
-        dayName: date.toLocaleDateString('en-US', { weekday: 'short' }),
-        dayNumber: date.getDate(),
-        month: date.toLocaleDateString('en-US', { month: 'short' }),
-        isToday: i === 0,
-        isPast: i < 0
+        isToday: i === 0
       });
     }
     
@@ -131,61 +136,43 @@ export default function PublicPage({ params }: PublicPageProps) {
 
   const calendarData = generateCalendarData();
 
-  // Available time slots
-  const timeSlots = [
-    "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-    "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM",
-    "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM",
-    "6:00 PM", "6:30 PM"
-  ];
-
-  const handleDateSelect = (date: Date) => {
-    setSelectedDate(date);
-    setSelectedTime(""); // Reset time when date changes
-  };
-
   const handleBooking = async () => {
     if (!selectedDate || !selectedTime || !customerName || !customerEmail || !selectedService) {
-      alert("Please fill in all required fields");
+      alert("Please fill in all fields");
       return;
     }
-
+    
     setIsBooking(true);
     
-    try {
-      // Simulate booking API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      alert("Booking successful! We'll send you a confirmation email shortly.");
-      
-      // Reset form
-      setSelectedDate(null);
-      setSelectedTime("");
-      setCustomerName("");
-      setCustomerEmail("");
-      setCustomerPhone("");
-      setSelectedService("");
-    } catch (error) {
-      alert("Booking failed. Please try again.");
-    } finally {
-      setIsBooking(false);
-    }
+    // Simulate booking process
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    alert("Booking submitted successfully! We'll confirm your appointment soon.");
+    setIsBooking(false);
+    
+    // Reset form
+    setSelectedDate(null);
+    setSelectedTime("");
+    setCustomerName("");
+    setCustomerEmail("");
+    setCustomerPhone("");
+    setSelectedService("");
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white text-black">
       {/* Header */}
-      <header className="bg-black text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center overflow-hidden">
+      <header className="bg-black text-white py-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
                 <Image 
                   src={businessData.logo} 
-                  alt={`${businessData.name} Logo`}
+                  alt={businessData.name} 
                   width={48} 
                   height={48} 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-full"
                 />
               </div>
               <div>
@@ -193,15 +180,9 @@ export default function PublicPage({ params }: PublicPageProps) {
                 <p className="text-gray-300 text-sm">Professional Barber Services</p>
               </div>
             </div>
-            <div className="hidden md:flex items-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                <span>{businessData.phone}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                <span>{businessData.address}</span>
-              </div>
+            <div className="flex items-center space-x-2">
+              <Star className="h-5 w-5 text-yellow-400" />
+              <span className="text-sm">4.9 (127 reviews)</span>
             </div>
           </div>
         </div>
@@ -209,256 +190,248 @@ export default function PublicPage({ params }: PublicPageProps) {
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-gray-50 to-gray-100 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Book Your Perfect Cut
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
+            Book Your Next Appointment
           </h2>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto">
             {businessData.description}
           </p>
-          <div className="flex items-center justify-center gap-4 text-sm text-gray-600">
-            <div className="flex items-center gap-1">
-              <Star className="h-4 w-4 text-black fill-current" />
-              <span>4.9/5</span>
+          <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
+            <div className="flex items-center space-x-2">
+              <CheckCircle className="h-5 w-5 text-black" />
+              <span>Professional Service</span>
             </div>
-            <span>•</span>
-            <span>100+ Happy Customers</span>
-            <span>•</span>
-            <span>Professional Service</span>
+            <div className="flex items-center space-x-2">
+              <Clock className="h-5 w-5 text-black" />
+              <span>Flexible Hours</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Users className="h-5 w-5 text-black" />
+              <span>Experienced Staff</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Booking Form */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Book Your Appointment</h3>
-              
-              {/* Service Selection */}
-              <div className="mb-8">
-                <Label className="text-sm font-semibold text-gray-700 mb-3 block">Select Service</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {businessData.services.map((service) => (
-                    <div
-                      key={service.id}
-                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
-                        selectedService === service.id
-                          ? 'border-black bg-black text-white'
-                          : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                      onClick={() => setSelectedService(service.id)}
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold">{service.name}</h4>
-                        <span className="text-lg font-bold">${service.price}</span>
-                      </div>
-                      <p className="text-sm opacity-80 mb-2">{service.description}</p>
-                      <div className="flex items-center gap-2 text-xs">
-                        <Clock className="h-3 w-3" />
-                        <span>{service.duration}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Date Selection */}
-              <div className="mb-8">
-                <Label className="text-sm font-semibold text-gray-700 mb-3 block">Select Date</Label>
-                <div className="grid grid-cols-7 gap-2">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                    <div key={day} className="text-center font-semibold text-gray-700 p-2 text-sm">
-                      {day}
-                    </div>
-                  ))}
-                  
-                  {calendarData.map((day, index) => (
-                    <div key={index} className="relative">
-                      <button
-                        onClick={() => handleDateSelect(day.date)}
-                        disabled={day.isPast || day.capacity === 0}
-                        className={`
-                          w-full p-3 text-center rounded-lg border-2 transition-all
-                          ${day.isPast || day.capacity === 0 
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                            : day.colorClass
-                          }
-                          ${selectedDate && selectedDate.toDateString() === day.date.toDateString()
-                            ? 'ring-2 ring-black ring-offset-2'
-                            : ''
-                          }
-                          ${!day.isPast && day.capacity > 0 ? 'hover:scale-105' : ''}
-                        `}
-                      >
-                        <div className="text-xs font-medium">{day.dayName}</div>
-                        <div className="text-lg font-bold">{day.dayNumber}</div>
-                        {day.isToday && (
-                          <div className="text-xs text-black font-semibold">TODAY</div>
-                        )}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Legend */}
-                <div className="mt-4 flex justify-center gap-4 text-xs">
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-green-600 rounded"></div>
-                    <span>Wide Open</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-green-400 rounded"></div>
-                    <span>Good</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-orange-500 rounded"></div>
-                    <span>Moderate</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-red-500 rounded"></div>
-                    <span>Limited</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Time Selection */}
-              {selectedDate && (
-                <div className="mb-8">
-                  <Label className="text-sm font-semibold text-gray-700 mb-3 block">Select Time</Label>
-                  <div className="grid grid-cols-4 gap-3">
-                    {timeSlots.map((time) => (
-                      <button
-                        key={time}
-                        onClick={() => setSelectedTime(time)}
-                        className={`p-3 text-center rounded-lg border-2 transition-all ${
-                          selectedTime === time
-                            ? 'border-black bg-black text-white'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                      >
-                        {time}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Customer Information */}
-              <div className="mb-8">
-                <Label className="text-sm font-semibold text-gray-700 mb-3 block">Your Information</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="name" className="text-xs text-gray-600">Full Name *</Label>
-                    <Input
-                      id="name"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="Enter your full name"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="email" className="text-xs text-gray-600">Email *</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={customerEmail}
-                      onChange={(e) => setCustomerEmail(e.target.value)}
-                      placeholder="Enter your email"
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="phone" className="text-xs text-gray-600">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      placeholder="Enter your phone number"
-                      className="mt-1"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Booking Button */}
-              <Button
-                onClick={handleBooking}
-                disabled={isBooking || !selectedDate || !selectedTime || !customerName || !customerEmail || !selectedService}
-                className="w-full bg-black hover:bg-gray-800 text-white py-4 text-lg font-semibold"
-              >
-                {isBooking ? (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Processing...
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <span>Book Appointment</span>
-                    <ArrowRight className="h-5 w-5" />
-                  </div>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Services Summary */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Services</h4>
-              <div className="space-y-3">
+          {/* Left Column - Services & Info */}
+          <div className="lg:col-span-2 space-y-12">
+            {/* Services */}
+            <section>
+              <h3 className="text-2xl font-bold text-black mb-6">Our Services</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {businessData.services.map((service) => (
-                  <div key={service.id} className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium text-gray-900">{service.name}</p>
-                      <p className="text-sm text-gray-600">{service.duration}</p>
+                  <div key={service.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow">
+                    <div className="flex justify-between items-start mb-3">
+                      <h4 className="text-lg font-semibold text-black">{service.name}</h4>
+                      <span className="text-2xl font-bold text-black">${service.price}</span>
                     </div>
-                    <span className="font-bold text-gray-900">${service.price}</span>
+                    <p className="text-gray-600 mb-3">{service.description}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500 flex items-center">
+                        <Clock className="h-4 w-4 mr-1" />
+                        {service.duration}
+                      </span>
+                      <Button 
+                        onClick={() => setSelectedService(service.id)}
+                        className="bg-black text-white hover:bg-gray-800"
+                      >
+                        Select
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </section>
+
+            {/* Contact Information */}
+            <section>
+              <h3 className="text-2xl font-bold text-black mb-6">Contact Information</h3>
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <MapPin className="h-5 w-5 text-black" />
+                    <span className="text-gray-700">{businessData.address}</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Phone className="h-5 w-5 text-black" />
+                    <span className="text-gray-700">{businessData.phone}</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <Mail className="h-5 w-5 text-black" />
+                    <span className="text-gray-700">{businessData.email}</span>
+                  </div>
+                </div>
+              </div>
+            </section>
 
             {/* Business Hours */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Business Hours</h4>
-              <div className="space-y-2">
-                {Object.entries(businessData.hours).map(([day, hours]) => (
-                  <div key={day} className="flex justify-between">
-                    <span className="text-gray-600">{day}</span>
-                    <span className="font-medium text-gray-900">{hours}</span>
-                  </div>
-                ))}
+            <section>
+              <h3 className="text-2xl font-bold text-black mb-6">Business Hours</h3>
+              <div className="bg-white border border-gray-200 rounded-lg p-6">
+                <div className="space-y-3">
+                  {Object.entries(businessData.hours).map(([day, hours]) => (
+                    <div key={day} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0">
+                      <span className="font-medium text-black">{day}</span>
+                      <span className="text-gray-600">{hours}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Right Column - Booking Form & Calendar */}
+          <div className="space-y-8">
+            {/* Booking Form */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-black mb-4">Book Appointment</h3>
+              <p className="text-sm text-gray-600 mb-6">Select a service and time that works for you</p>
+              
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="service" className="text-sm font-medium text-black">Select Service</Label>
+                  <select
+                    id="service"
+                    value={selectedService}
+                    onChange={(e) => setSelectedService(e.target.value)}
+                    className="w-full mt-1 p-3 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-black focus:border-transparent"
+                  >
+                    <option value="">Choose a service...</option>
+                    {businessData.services.map((service) => (
+                      <option key={service.id} value={service.id}>
+                        {service.name} - ${service.price}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <Label htmlFor="date" className="text-sm font-medium text-black">Select Date</Label>
+                  <input
+                    type="date"
+                    id="date"
+                    value={selectedDate ? selectedDate.toISOString().split('T')[0] : ''}
+                    onChange={(e) => setSelectedDate(e.target.value ? new Date(e.target.value) : null)}
+                    className="w-full mt-1 p-3 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="time" className="text-sm font-medium text-black">Select Time</Label>
+                  <select
+                    id="time"
+                    value={selectedTime}
+                    onChange={(e) => setSelectedTime(e.target.value)}
+                    className="w-full mt-1 p-3 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-black focus:border-transparent"
+                  >
+                    <option value="">Choose a time...</option>
+                    <option value="09:00">9:00 AM</option>
+                    <option value="10:00">10:00 AM</option>
+                    <option value="11:00">11:00 AM</option>
+                    <option value="12:00">12:00 PM</option>
+                    <option value="13:00">1:00 PM</option>
+                    <option value="14:00">2:00 PM</option>
+                    <option value="15:00">3:00 PM</option>
+                    <option value="16:00">4:00 PM</option>
+                    <option value="17:00">5:00 PM</option>
+                    <option value="18:00">6:00 PM</option>
+                  </select>
+                </div>
+
+                <div>
+                  <Label htmlFor="name" className="text-sm font-medium text-black">Your Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    placeholder="Enter your full name"
+                    className="mt-1 bg-white text-black border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="email" className="text-sm font-medium text-black">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="mt-1 bg-white text-black border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="phone" className="text-sm font-medium text-black">Phone (Optional)</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="Enter your phone number"
+                    className="mt-1 bg-white text-black border-gray-300 focus:ring-2 focus:ring-black focus:border-transparent"
+                  />
+                </div>
+
+                <Button
+                  onClick={handleBooking}
+                  disabled={isBooking || !selectedDate || !selectedTime || !customerName || !customerEmail || !selectedService}
+                  className="w-full bg-black text-white hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  {isBooking ? "Booking..." : "Book Appointment"}
+                </Button>
               </div>
             </div>
 
-            {/* Reviews */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Customer Reviews</h4>
-              <div className="space-y-4">
-                {businessData.reviews.map((review, index) => (
-                  <div key={index} className="border-l-4 border-black pl-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 ${
-                              i < review.rating ? 'text-yellow-500 fill-current' : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-1">"{review.comment}"</p>
-                    <p className="text-xs text-gray-500">- {review.name}</p>
+            {/* Availability Calendar */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-black mb-4">Availability</h3>
+              <p className="text-sm text-gray-600 mb-6">Check our availability for the next 30 days</p>
+              
+              <div className="grid grid-cols-7 gap-1 mb-4">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                  <div key={day} className="text-xs font-medium text-gray-600 text-center py-2">
+                    {day}
                   </div>
                 ))}
+              </div>
+              
+              <div className="grid grid-cols-7 gap-1">
+                {calendarData.map((day, index) => (
+                  <div
+                    key={index}
+                    className={`aspect-square rounded text-xs font-medium flex items-center justify-center cursor-pointer transition-colors ${
+                      day.isToday ? 'ring-2 ring-black' : ''
+                    } ${day.colorClass}`}
+                    title={`${day.date.toLocaleDateString()}: ${day.status}`}
+                  >
+                    {day.isToday ? 'TODAY' : day.date.getDate()}
+                  </div>
+                ))}
+              </div>
+              
+              <div className="mt-4 space-y-2">
+                <div className="flex items-center space-x-2 text-xs">
+                  <div className="w-3 h-3 bg-red-500 rounded"></div>
+                  <span className="text-gray-600">Limited</span>
+                </div>
+                <div className="flex items-center space-x-2 text-xs">
+                  <div className="w-3 h-3 bg-orange-500 rounded"></div>
+                  <span className="text-gray-600">Moderate</span>
+                </div>
+                <div className="flex items-center space-x-2 text-xs">
+                  <div className="w-3 h-3 bg-green-400 rounded"></div>
+                  <span className="text-gray-600">Good</span>
+                </div>
+                <div className="flex items-center space-x-2 text-xs">
+                  <div className="w-3 h-3 bg-green-600 rounded"></div>
+                  <span className="text-gray-600">Wide Open</span>
+                </div>
               </div>
             </div>
           </div>
@@ -466,34 +439,9 @@ export default function PublicPage({ params }: PublicPageProps) {
       </div>
 
       {/* Footer */}
-      <footer className="bg-black text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h5 className="text-lg font-semibold mb-4">{businessData.name}</h5>
-              <p className="text-gray-300 text-sm">{businessData.description}</p>
-            </div>
-            <div>
-              <h5 className="text-lg font-semibold mb-4">Contact</h5>
-              <div className="space-y-2 text-sm text-gray-300">
-                <p>{businessData.address}</p>
-                <p>{businessData.phone}</p>
-                <p>{businessData.email}</p>
-              </div>
-            </div>
-            <div>
-              <h5 className="text-lg font-semibold mb-4">Hours</h5>
-              <div className="space-y-1 text-sm text-gray-300">
-                {Object.entries(businessData.hours).map(([day, hours]) => (
-                  <p key={day}>{day}: {hours}</p>
-                ))}
-              </div>
-            </div>
-          </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400 text-sm">
-            <p>&copy; 2024 {businessData.name}. All rights reserved.</p>
-            <p className="mt-1">Powered by NuBarber</p>
-          </div>
+      <footer className="bg-black text-white py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <p className="text-gray-300">&copy; 2024 {businessData.name}. All rights reserved.</p>
         </div>
       </footer>
     </div>

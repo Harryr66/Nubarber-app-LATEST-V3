@@ -1,35 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthService } from '@/lib/auth';
 
-interface SignUpRequest {
-  email: string;
-  password: string;
-  shopName: string;
-  locationType: string;
-  businessAddress?: string;
-  staffCount: number;
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const body: SignUpRequest = await request.json();
-    const { email, password, shopName, locationType, businessAddress, staffCount } = body;
-
-    // Debug logging
-    console.log('Signup request received:', {
-      email,
-      shopName,
-      locationType,
-      businessAddress,
-      staffCount,
-      passwordLength: password?.length
-    });
+    const body = await request.json();
+    const { email, password, shopName, locationType, businessAddress, staffCount, country } = body;
 
     // Validate required fields
-    if (!email || !password || !shopName) {
-      console.log('Validation failed - missing fields:', { email: !!email, password: !!password, shopName: !!shopName });
+    if (!email || !password || !shopName || !locationType || !staffCount || !country) {
       return NextResponse.json(
-        { message: 'Email, password, and shop name are required' },
+        { error: 'Missing required fields: email, password, shopName, locationType, staffCount, country' },
         { status: 400 }
       );
     }
@@ -37,102 +17,106 @@ export async function POST(request: NextRequest) {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      console.log('Email validation failed:', email);
       return NextResponse.json(
-        { message: 'Invalid email format' },
+        { error: 'Invalid email format' },
         { status: 400 }
       );
     }
 
     // Validate password strength
     if (password.length < 8) {
-      console.log('Password validation failed - too short:', password.length);
       return NextResponse.json(
-        { message: 'Password must be at least 8 characters long' },
+        { error: 'Password must be at least 8 characters long' },
         { status: 400 }
       );
     }
 
-    // Validate shop name
-    if (shopName.trim().length < 2) {
-      console.log('Shop name validation failed:', shopName);
+    // Validate location type
+    if (!['physical', 'mobile'].includes(locationType)) {
       return NextResponse.json(
-        { message: 'Shop name must be at least 2 characters long' },
+        { error: 'Invalid location type. Must be "physical" or "mobile"' },
         { status: 400 }
       );
     }
 
-    // Validate location type and address
-    if (locationType === 'physical' && !businessAddress?.trim()) {
-      console.log('Business address validation failed for physical location');
+    // Validate business address for physical locations
+    if (locationType === 'physical' && (!businessAddress || businessAddress.trim().length === 0)) {
       return NextResponse.json(
-        { message: 'Business address is required for physical locations' },
+        { error: 'Business address is required for physical locations' },
         { status: 400 }
       );
     }
 
     // Validate staff count
-    if (staffCount < 1 || staffCount > 100) {
-      console.log('Staff count validation failed:', staffCount);
+    if (typeof staffCount !== 'number' || staffCount < 1 || staffCount > 100) {
       return NextResponse.json(
-        { message: 'Staff count must be between 1 and 100' },
+        { error: 'Staff count must be a number between 1 and 100' },
         { status: 400 }
       );
     }
 
-    console.log('All validations passed, attempting to create user...');
-
-    try {
-      // Create user with secure service
-      const user = await AuthService.createUser(
-        email,
-        password,
-        shopName,
-        locationType,
-        businessAddress,
-        staffCount
+    // Validate country
+    const validCountries = ['US', 'UK', 'CA', 'AU', 'EU'];
+    if (!validCountries.includes(country)) {
+      return NextResponse.json(
+        { error: 'Invalid country code' },
+        { status: 400 }
       );
+    }
 
-      console.log('User created successfully:', user.id);
+    console.log('Signup request body:', { email, shopName, locationType, businessAddress, staffCount, country });
 
-      return NextResponse.json({
-        success: true,
-        user: {
-          id: user.id,
-          email: user.email,
-          shopName: user.shopName,
-          role: user.role,
-          createdAt: user.createdAt
-        },
-        message: 'Account created successfully'
-      });
+    // Create user account
+    const user = await AuthService.createUser(
+      email,
+      password,
+      shopName,
+      locationType,
+      businessAddress,
+      staffCount,
+      country
+    );
 
-    } catch (authError: any) {
-      console.error('AuthService.createUser failed:', authError);
-      // Handle specific creation errors
-      if (authError.message.includes('already exists')) {
+    console.log('Signup response status: 200, success:', { userId: user.id, email: user.email, region: user.region });
+
+    return NextResponse.json({
+      message: 'Account created successfully',
+      user: {
+        id: user.id,
+        email: user.email,
+        shopName: user.shopName,
+        locationType: user.locationType,
+        businessAddress: user.businessAddress,
+        staffCount: user.staffCount,
+        region: user.region,
+        currency: user.currency,
+        timezone: user.timezone,
+        createdAt: user.createdAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Signup error:', error);
+    
+    if (error instanceof Error) {
+      if (error.message.includes('already exists')) {
         return NextResponse.json(
-          { message: 'An account with this email already exists' },
+          { error: 'An account with this email already exists' },
           { status: 409 }
         );
-      } else if (authError.message.includes('Password')) {
+      }
+      
+      if (error.message.includes('Password must be')) {
         return NextResponse.json(
-          { message: authError.message },
-          { status: 400 }
-        );
-      } else {
-        return NextResponse.json(
-          { message: authError.message },
+          { error: error.message },
           { status: 400 }
         );
       }
     }
 
-  } catch (error) {
-    console.error('Sign up error:', error);
     return NextResponse.json(
-      { message: 'Internal server error' },
+      { error: 'Failed to create account. Please try again.' },
       { status: 500 }
-      );
+    );
   }
 } 

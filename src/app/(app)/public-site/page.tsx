@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -45,6 +45,14 @@ export default function PublicSitePage() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load existing logo from localStorage on page load
+  useEffect(() => {
+    const existingLogo = localStorage.getItem('nubarber_logo');
+    if (existingLogo) {
+      setLogoPreview(existingLogo);
+    }
+  }, []);
+
   // Form data state
   const [headline, setHeadline] = useState("Book your next appointment with us");
   const [description, setDescription] = useState("Easy and fast booking, available 24/7.");
@@ -85,6 +93,9 @@ export default function PublicSitePage() {
   const handleRemoveLogo = () => {
     setLogoFile(null);
     setLogoPreview("");
+    // Clear logo from localStorage
+    localStorage.removeItem('nubarber_logo');
+    localStorage.removeItem('nubarber_logo_name');
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -97,6 +108,12 @@ export default function PublicSitePage() {
       try {
         // Simulate file upload - in production this would go to your storage service
         await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Store logo in localStorage for the public website to use
+        if (logoPreview) {
+          localStorage.setItem('nubarber_logo', logoPreview);
+          localStorage.setItem('nubarber_logo_name', logoFile.name);
+        }
         
         // Here you would typically upload to Firebase Storage, AWS S3, etc.
         console.log("Logo uploaded:", logoFile.name);
