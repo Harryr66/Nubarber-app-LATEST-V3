@@ -43,15 +43,31 @@ export default function PublicSitePage() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string>("");
   const [isUploading, setIsUploading] = useState(false);
+  const [hasExistingLogo, setHasExistingLogo] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Load existing logo from localStorage on page load
   useEffect(() => {
     const existingLogo = localStorage.getItem('nubarber_logo');
-    if (existingLogo) {
+    const existingBusinessName = localStorage.getItem('nubarber_business_name');
+    
+    // Only load logo if it matches the current business name
+    if (existingLogo && existingBusinessName === businessName) {
       setLogoPreview(existingLogo);
+      setHasExistingLogo(true);
+      console.log('✅ Loaded existing logo for:', businessName);
+    } else {
+      // Clear any mismatched logo data
+      if (existingLogo && existingBusinessName !== businessName) {
+        console.log('🧹 Clearing logo data for different business:', existingBusinessName, 'vs', businessName);
+        localStorage.removeItem('nubarber_logo');
+        localStorage.removeItem('nubarber_logo_name');
+        localStorage.removeItem('nubarber_business_name');
+        setLogoPreview("");
+        setHasExistingLogo(false);
+      }
     }
-  }, []);
+  }, [businessName]);
 
   // Form data state
   const [headline, setHeadline] = useState("Book your next appointment with us");
@@ -168,7 +184,7 @@ export default function PublicSitePage() {
                         <Label className="text-sm md:text-base">Shop Logo</Label>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                             <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-gray-200 overflow-hidden flex-shrink-0">
-                                {logoPreview ? (
+                                {logoPreview && hasExistingLogo ? (
                                   <Image 
                                     src={logoPreview} 
                                     alt="Shop Logo" 
