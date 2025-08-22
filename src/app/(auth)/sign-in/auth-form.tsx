@@ -145,18 +145,31 @@ export default function AuthForm() {
   
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('🚀 Signup form submitted');
     setIsLoading(true);
     setError("");
 
+    console.log('📝 Form data:', { email, password, shopName, locationType, businessAddress, staffCount, country });
+
     // Validate required fields
     if (!email || !password || !shopName || !locationType || !staffCount || !country) {
-      setError("Please fill in all required fields");
+      const missingFields = [];
+      if (!email) missingFields.push('email');
+      if (!password) missingFields.push('password');
+      if (!shopName) missingFields.push('shopName');
+      if (!locationType) missingFields.push('locationType');
+      if (!staffCount) missingFields.push('staffCount');
+      if (!country) missingFields.push('country');
+      
+      console.error('❌ Missing fields:', missingFields);
+      setError(`Missing required fields: ${missingFields.join(', ')}`);
       setIsLoading(false);
       return;
     }
 
     // Validate password strength
     if (password.length < 8) {
+      console.error('❌ Password too short');
       setError("Password must be at least 8 characters long");
       setIsLoading(false);
       return;
@@ -164,12 +177,14 @@ export default function AuthForm() {
 
     // Validate business address for physical locations
     if (locationType === 'physical' && (!businessAddress || businessAddress.trim().length === 0)) {
+      console.error('❌ Business address required for physical location');
       setError("Business address is required for physical locations");
       setIsLoading(false);
       return;
     }
 
     if (!staffCount || staffCount < 1 || staffCount > 100) {
+      console.error('❌ Invalid staff count:', staffCount);
       setError('Staff count must be between 1 and 100');
       setIsLoading(false);
       return;
@@ -187,7 +202,8 @@ export default function AuthForm() {
         country
       };
       
-      console.log('Sending signup request to local endpoint:', requestBody);
+      console.log('📤 Sending signup request to local endpoint:', requestBody);
+      console.log('🌐 Endpoint URL: /api/auth/local-signup');
       
       const response = await fetch('/api/auth/local-signup', {
         method: 'POST',
@@ -197,24 +213,32 @@ export default function AuthForm() {
         body: JSON.stringify(requestBody),
       });
 
-      console.log('Signup response status:', response.status);
+      console.log('📥 Response received:', response);
+      console.log('📊 Response status:', response.status);
+      console.log('📋 Response headers:', Object.fromEntries(response.headers.entries()));
       
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Signup error response:', errorData);
-        throw new Error(errorData.message || 'Account creation failed');
+        console.error('❌ Signup error response:', errorData);
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       const userData = await response.json();
-      console.log('Signup success:', userData);
+      console.log('✅ Signup success:', userData);
       
       // Use the auth context to login with user data
+      console.log('🔐 Logging in user...');
       login(userData.user);
       
       // Redirect to dashboard immediately
+      console.log('🔄 Redirecting to dashboard...');
       router.push('/dashboard');
     } catch (err: any) {
-      console.error('Signup error:', err);
+      console.error('💥 Signup error caught:', err);
+      console.error('💥 Error type:', typeof err);
+      console.error('💥 Error message:', err.message);
+      console.error('💥 Error stack:', err.stack);
+      
       // Handle specific error cases
       if (err.message.includes('Email already exists')) {
         setError("An account with this email already exists. Please sign in instead.");
@@ -226,6 +250,7 @@ export default function AuthForm() {
         setError(`Account creation failed: ${err.message}`);
       }
     } finally {
+      console.log('🏁 Signup process finished');
       setIsLoading(false);
     }
   };
