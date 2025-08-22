@@ -96,6 +96,7 @@ export default function PublicSitePage() {
     // Clear logo from localStorage
     localStorage.removeItem('nubarber_logo');
     localStorage.removeItem('nubarber_logo_name');
+    localStorage.removeItem('nubarber_business_name');
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -113,6 +114,8 @@ export default function PublicSitePage() {
         if (logoPreview) {
           localStorage.setItem('nubarber_logo', logoPreview);
           localStorage.setItem('nubarber_logo_name', logoFile.name);
+          // Also store the business name
+          localStorage.setItem('nubarber_business_name', businessName);
         }
         
         // Here you would typically upload to Firebase Storage, AWS S3, etc.
