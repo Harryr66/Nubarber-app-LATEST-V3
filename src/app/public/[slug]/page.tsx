@@ -82,7 +82,7 @@ export default function PublicPage({ params }: PublicPageProps) {
     ]
   };
 
-  // Generate calendar data for the next 30 days
+  // Generate calendar data for the next 30 days with realistic barber availability
   const generateCalendarData = () => {
     const today = new Date();
     const calendarData = [];
@@ -91,43 +91,87 @@ export default function PublicPage({ params }: PublicPageProps) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
       
-      // Generate realistic availability (weekends less available, weekdays more available)
+      // Get day of week (0 = Sunday, 6 = Saturday)
       const dayOfWeek = date.getDay();
-      let baseCapacity = 80; // Base availability
       
-      if (dayOfWeek === 0) baseCapacity = 0; // Sunday closed
-      else if (dayOfWeek === 6) baseCapacity = 40; // Saturday limited
-      else if (dayOfWeek === 5) baseCapacity = 60; // Friday moderate
+      // Base availability patterns for barbershops
+      let baseCapacity = 0;
+      let isClosed = false;
       
-      // Add some randomness
-      const capacity = Math.max(0, Math.min(100, baseCapacity + (Math.random() - 0.5) * 20));
+      if (dayOfWeek === 0) {
+        // Sunday - typically closed
+        baseCapacity = 0;
+        isClosed = true;
+      } else if (dayOfWeek === 6) {
+        // Saturday - limited hours, moderate availability
+        baseCapacity = 45;
+      } else if (dayOfWeek === 5) {
+        // Friday - popular day, good availability
+        baseCapacity = 75;
+      } else {
+        // Weekdays - full availability
+        baseCapacity = 85;
+      }
       
+      // Add realistic variations based on time of month
+      const dayOfMonth = date.getDate();
+      let timeVariation = 0;
+      
+      // Beginning of month (payday effect) - more busy
+      if (dayOfMonth <= 5) {
+        timeVariation = 15;
+      }
+      // Middle of month - normal
+      else if (dayOfMonth <= 20) {
+        timeVariation = 0;
+      }
+      // End of month - less busy
+      else {
+        timeVariation = -10;
+      }
+      
+      // Add some randomness for realistic variation
+      const randomVariation = (Math.random() - 0.5) * 20;
+      
+      // Calculate final capacity
+      let capacity = Math.max(0, Math.min(100, baseCapacity + timeVariation + randomVariation));
+      
+      // Ensure closed days stay closed
+      if (isClosed) {
+        capacity = 0;
+      }
+      
+      // Determine color class and status based on capacity
       let colorClass = '';
       let status = '';
       
       if (capacity === 0) {
         colorClass = 'bg-gray-300 text-gray-600';
         status = 'Closed';
-      } else if (capacity < 30) {
-        colorClass = 'bg-red-500 text-white';
+      } else if (capacity < 20) {
+        colorClass = 'bg-red-600 text-white shadow-lg';
+        status = 'Very Limited';
+      } else if (capacity < 40) {
+        colorClass = 'bg-red-500 text-white shadow-md';
         status = 'Limited';
       } else if (capacity < 60) {
-        colorClass = 'bg-orange-500 text-white';
+        colorClass = 'bg-orange-500 text-white shadow-md';
         status = 'Moderate';
       } else if (capacity < 80) {
-        colorClass = 'bg-green-400 text-black';
+        colorClass = 'bg-green-400 text-black shadow-sm';
         status = 'Good';
       } else {
-        colorClass = 'bg-green-600 text-white';
+        colorClass = 'bg-green-500 text-white shadow-sm';
         status = 'Wide Open';
       }
       
       calendarData.push({
         date,
-        capacity,
+        capacity: Math.round(capacity),
         colorClass,
         status,
-        isToday: i === 0
+        isToday: i === 0,
+        isClosed
       });
     }
     
@@ -332,6 +376,32 @@ export default function PublicPage({ params }: PublicPageProps) {
                     onChange={(e) => setSelectedDate(e.target.value ? new Date(e.target.value) : null)}
                     className="w-full mt-1 p-3 border border-gray-300 rounded-md bg-white text-black focus:ring-2 focus:ring-black focus:border-transparent"
                   />
+                  {selectedDate && (
+                    <div className="mt-2 p-2 rounded-md border-l-4 bg-gray-50">
+                      {(() => {
+                        const selectedDay = calendarData.find(d => 
+                          d.date.toDateString() === selectedDate.toDateString()
+                        );
+                        if (selectedDay) {
+                          return (
+                            <div className="flex items-center space-x-2">
+                              <div className={`w-3 h-3 rounded-full ${
+                                selectedDay.capacity >= 60 
+                                  ? 'bg-green-500' 
+                                  : selectedDay.capacity >= 30 
+                                  ? 'bg-orange-500'
+                                  : 'bg-red-500'
+                              }`}></div>
+                              <span className="text-sm font-medium text-black">
+                                {selectedDay.status} - {selectedDay.capacity}% available
+                              </span>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -404,9 +474,10 @@ export default function PublicPage({ params }: PublicPageProps) {
 
             {/* Availability Calendar */}
             <div className="bg-white border border-gray-200 rounded-lg p-6">
-              <h3 className="text-xl font-bold text-black mb-4">Availability</h3>
-              <p className="text-sm text-gray-600 mb-6">Check our availability for the next 30 days</p>
+              <h3 className="text-xl font-bold text-black mb-4">Availability Heat Map</h3>
+              <p className="text-sm text-gray-600 mb-6">See real-time availability at a glance</p>
               
+              {/* Calendar Header */}
               <div className="grid grid-cols-7 gap-1 mb-4">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
                   <div key={day} className="text-xs font-medium text-gray-600 text-center py-2">
@@ -415,37 +486,146 @@ export default function PublicPage({ params }: PublicPageProps) {
                 ))}
               </div>
               
-              <div className="grid grid-cols-7 gap-1">
+              {/* Heat Map Calendar */}
+              <div className="grid grid-cols-7 gap-1 mb-6">
                 {calendarData.map((day, index) => (
                   <div
                     key={index}
-                    className={`aspect-square rounded text-xs font-medium flex items-center justify-center cursor-pointer transition-colors ${
-                      day.isToday ? 'ring-2 ring-black' : ''
+                    className={`aspect-square rounded-lg text-xs font-medium flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 ${
+                      day.isToday ? 'ring-2 ring-black ring-offset-2' : ''
                     } ${day.colorClass}`}
-                    title={`${day.date.toLocaleDateString()}: ${day.status}`}
+                    title={`${day.date.toLocaleDateString()}: ${day.status} - ${day.capacity}% available`}
                   >
-                    {day.isToday ? 'TODAY' : day.date.getDate()}
+                    <div className="text-xs font-bold mb-1">
+                      {day.isToday ? 'TODAY' : day.date.getDate()}
+                    </div>
+                    <div className="text-xs opacity-80">
+                      {day.capacity}%
+                    </div>
                   </div>
                 ))}
               </div>
               
-              <div className="mt-4 space-y-2">
-                <div className="flex items-center space-x-2 text-xs">
-                  <div className="w-3 h-3 bg-red-500 rounded"></div>
-                  <span className="text-gray-600">Limited</span>
+              {/* Premium Legend */}
+              <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
+                <h4 className="text-sm font-semibold text-black mb-3">Availability Guide</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 bg-green-500 rounded-full shadow-sm"></div>
+                    <div>
+                      <span className="text-sm font-medium text-black">Wide Open</span>
+                      <p className="text-xs text-gray-600">80-100% available</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 bg-green-400 rounded-full shadow-sm"></div>
+                    <div>
+                      <span className="text-sm font-medium text-black">Good</span>
+                      <p className="text-xs text-gray-600">60-79% available</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 bg-orange-500 rounded-full shadow-sm"></div>
+                    <div>
+                      <span className="text-sm font-medium text-black">Moderate</span>
+                      <p className="text-xs text-gray-600">30-59% available</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 bg-red-500 rounded-full shadow-sm"></div>
+                    <div>
+                      <span className="text-sm font-medium text-black">Limited</span>
+                      <p className="text-xs text-gray-600">1-29% available</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2 text-xs">
-                  <div className="w-3 h-3 bg-orange-500 rounded"></div>
-                  <span className="text-gray-600">Moderate</span>
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-4 h-4 bg-gray-300 rounded-full shadow-sm"></div>
+                    <div>
+                      <span className="text-sm font-medium text-black">Closed</span>
+                      <p className="text-xs text-gray-600">No availability</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2 text-xs">
-                  <div className="w-3 h-3 bg-green-400 rounded"></div>
-                  <span className="text-gray-600">Good</span>
+              </div>
+              
+              {/* Quick Stats */}
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                <div className="text-center p-2 bg-green-50 rounded border border-green-200">
+                  <div className="text-lg font-bold text-green-700">
+                    {calendarData.filter(d => d.capacity >= 60).length}
+                  </div>
+                  <div className="text-xs text-green-600">Good Days</div>
                 </div>
-                <div className="flex items-center space-x-2 text-xs">
-                  <div className="w-3 h-3 bg-green-600 rounded"></div>
-                  <span className="text-gray-600">Wide Open</span>
+                <div className="text-center p-2 bg-orange-50 rounded border border-orange-200">
+                  <div className="text-lg font-bold text-orange-700">
+                    {calendarData.filter(d => d.capacity >= 30 && d.capacity < 60).length}
+                  </div>
+                  <div className="text-xs text-orange-600">Moderate</div>
                 </div>
+                <div className="text-center p-2 bg-red-50 rounded border border-red-200">
+                  <div className="text-lg font-bold text-red-700">
+                    {calendarData.filter(d => d.capacity < 30 && d.capacity > 0).length}
+                  </div>
+                  <div className="text-xs text-red-600">Limited</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Next Available Slots */}
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-black mb-4">Next Available Slots</h3>
+              <p className="text-sm text-gray-600 mb-4">Quick booking for immediate availability</p>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {calendarData
+                  .filter(day => day.capacity > 0 && !day.isClosed)
+                  .slice(0, 6)
+                  .map((day, index) => (
+                    <div
+                      key={index}
+                      className={`p-3 rounded-lg border-2 cursor-pointer transition-all hover:scale-105 ${
+                        day.capacity >= 60 
+                          ? 'border-green-200 bg-green-50 hover:border-green-300' 
+                          : day.capacity >= 30 
+                          ? 'border-orange-200 bg-orange-50 hover:border-orange-300'
+                          : 'border-red-200 bg-red-50 hover:border-red-300'
+                      }`}
+                      onClick={() => setSelectedDate(day.date)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-black">
+                            {day.date.toLocaleDateString('en-US', { 
+                              weekday: 'short', 
+                              month: 'short', 
+                              day: 'numeric' 
+                            })}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {day.status} availability
+                          </div>
+                        </div>
+                        <div className={`w-3 h-3 rounded-full ${
+                          day.capacity >= 60 
+                            ? 'bg-green-500' 
+                            : day.capacity >= 30 
+                            ? 'bg-orange-500'
+                            : 'bg-red-500'
+                        }`}></div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+              
+              <div className="mt-4 text-center">
+                <button 
+                  onClick={() => setSelectedDate(calendarData.find(d => d.capacity > 0 && !d.isClosed)?.date || null)}
+                  className="text-sm text-black underline hover:text-gray-700"
+                >
+                  View all available dates
+                </button>
               </div>
             </div>
           </div>
