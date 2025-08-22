@@ -191,7 +191,7 @@ export default function AuthForm() {
     }
     
     try {
-      // Use the direct Firebase signup endpoint
+      // Use the working signup endpoint (no Firebase dependency)
       const requestBody = { 
         email, 
         password, 
@@ -202,10 +202,10 @@ export default function AuthForm() {
         country
       };
       
-      console.log('📤 Sending signup request to direct Firebase endpoint:', requestBody);
-      console.log('🌐 Endpoint URL: /api/auth/firebase-signup');
+      console.log('📤 Sending signup request to working endpoint:', requestBody);
+      console.log('🌐 Endpoint URL: /api/auth/working-signup');
       
-      const response = await fetch('/api/auth/firebase-signup', { // New direct endpoint
+      const response = await fetch('/api/auth/working-signup', { // Working endpoint
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
