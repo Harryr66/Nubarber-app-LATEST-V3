@@ -164,7 +164,7 @@ export default function PublicSitePage() {
                     <div className="space-y-3 md:space-y-4">
                         <Label className="text-sm md:text-base">Shop Logo</Label>
                         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                            <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center border overflow-hidden flex-shrink-0">
+                            <div className="w-20 h-20 rounded-lg bg-gray-100 flex items-center justify-center border-2 border-gray-200 overflow-hidden flex-shrink-0">
                                 {logoPreview ? (
                                   <Image 
                                     src={logoPreview} 
@@ -174,7 +174,9 @@ export default function PublicSitePage() {
                                     className="w-full h-full object-cover"
                                   />
                                 ) : (
-                                  <ImageIcon className="h-8 w-8 text-gray-400" />
+                                  <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
+                                    <span className="text-white text-2xl font-bold">H</span>
+                                  </div>
                                 )}
                             </div>
                             <div className="flex flex-col sm:flex-row gap-2">
@@ -189,7 +191,7 @@ export default function PublicSitePage() {
                                   variant="outline" 
                                   onClick={handleUploadClick}
                                   disabled={isUploading}
-                                  className="w-full sm:w-auto"
+                                  className="w-full sm:w-auto border-black text-black hover:bg-black hover:text-white"
                                 >
                                   <Upload className="mr-2 h-4 w-4" /> 
                                   {logoFile ? "Change Logo" : "Upload Logo"}
@@ -199,7 +201,7 @@ export default function PublicSitePage() {
                                     variant="outline" 
                                     onClick={handleRemoveLogo}
                                     disabled={isUploading}
-                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 w-full sm:w-auto"
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 w-full sm:w-auto border-red-200"
                                   >
                                     <X className="mr-2 h-4 w-4" /> Remove
                                   </Button>
@@ -262,6 +264,76 @@ export default function PublicSitePage() {
                           placeholder="Enter your description"
                           className="min-h-[80px] md:min-h-[100px] text-base"
                         />
+                    </div>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader className="pb-4 md:pb-6">
+                    <CardTitle className="text-lg md:text-xl">Website Preview</CardTitle>
+                    <CardDescription className="text-sm md:text-base">
+                      This is how your public booking page will look to customers.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6 md:space-y-8">
+                    {/* Preview Header */}
+                    <div className="bg-black text-white p-4 rounded-lg">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                                {logoPreview ? (
+                                    <Image 
+                                        src={logoPreview} 
+                                        alt="Preview Logo" 
+                                        width={40} 
+                                        height={40} 
+                                        className="w-full h-full object-cover rounded-full"
+                                    />
+                                ) : (
+                                    <span className="text-black text-lg font-bold">H</span>
+                                )}
+                            </div>
+                            <div>
+                                <h3 className="font-bold">{businessName}</h3>
+                                <p className="text-sm text-gray-300">Professional Barber Services</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Preview Content */}
+                    <div className="bg-white border border-gray-200 p-4 rounded-lg">
+                        <h4 className="text-xl font-bold text-black mb-3">Book Your Next Appointment</h4>
+                        <p className="text-gray-600 mb-4">Professional barber services with easy online booking. Available 24/7 for your convenience.</p>
+                        
+                        {/* Service Preview */}
+                        <div className="bg-gray-50 p-3 rounded border border-gray-200">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="font-medium text-black">Classic Haircut</span>
+                                <span className="font-bold text-black">$35</span>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">A timeless haircut tailored to your preferences.</p>
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs text-gray-500">⏱️ 30 min</span>
+                                <button className="bg-black text-white text-xs px-3 py-1 rounded">Select</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Preview Form */}
+                    <div className="bg-white border border-gray-200 p-4 rounded-lg">
+                        <h4 className="font-bold text-black mb-3">Book Appointment</h4>
+                        <div className="space-y-3">
+                            <div className="border border-gray-300 rounded p-2">
+                                <span className="text-sm text-gray-500">Choose a service...</span>
+                            </div>
+                            <div className="border border-gray-300 rounded p-2">
+                                <span className="text-sm text-gray-500">Select date...</span>
+                            </div>
+                            <div className="border border-gray-300 rounded p-2">
+                                <span className="text-sm text-gray-500">Choose time...</span>
+                            </div>
+                            <button className="w-full bg-black text-white py-2 rounded font-medium">
+                                Book Appointment
+                            </button>
+                        </div>
                     </div>
                 </CardContent>
             </Card>

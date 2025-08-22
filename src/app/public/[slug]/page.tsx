@@ -181,7 +181,9 @@ export default function PublicPage({ params }: PublicPageProps) {
               </div>
             </div>
             <div className="flex items-center space-x-2">
-              <Star className="h-5 w-5 text-yellow-400" />
+              <div className="w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center">
+                <span className="text-black text-xs font-bold">★</span>
+              </div>
               <span className="text-sm">4.9 (127 reviews)</span>
             </div>
           </div>
@@ -189,7 +191,7 @@ export default function PublicPage({ params }: PublicPageProps) {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-gray-50 to-gray-100 py-16">
+      <section className="bg-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold text-black mb-6">
             Book Your Next Appointment
@@ -199,15 +201,21 @@ export default function PublicPage({ params }: PublicPageProps) {
           </p>
           <div className="flex items-center justify-center space-x-6 text-sm text-gray-600">
             <div className="flex items-center space-x-2">
-              <CheckCircle className="h-5 w-5 text-black" />
+              <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center">
+                <span className="text-white text-xs">✓</span>
+              </div>
               <span>Professional Service</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Clock className="h-5 w-5 text-black" />
+              <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center">
+                <span className="text-white text-xs">⏰</span>
+              </div>
               <span>Flexible Hours</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Users className="h-5 w-5 text-black" />
+              <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center">
+                <span className="text-white text-xs">👥</span>
+              </div>
               <span>Experienced Staff</span>
             </div>
           </div>
@@ -232,15 +240,15 @@ export default function PublicPage({ params }: PublicPageProps) {
                     <p className="text-gray-600 mb-3">{service.description}</p>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500 flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
+                        <span className="mr-1">⏱️</span>
                         {service.duration}
                       </span>
-                      <Button 
+                      <button 
                         onClick={() => setSelectedService(service.id)}
-                        className="bg-black text-white hover:bg-gray-800"
+                        className="bg-black text-white hover:bg-gray-800 px-4 py-2 rounded-md transition-colors"
                       >
                         Select
-                      </Button>
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -253,15 +261,21 @@ export default function PublicPage({ params }: PublicPageProps) {
               <div className="bg-white border border-gray-200 rounded-lg p-6">
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
-                    <MapPin className="h-5 w-5 text-black" />
+                    <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs">📍</span>
+                    </div>
                     <span className="text-gray-700">{businessData.address}</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Phone className="h-5 w-5 text-black" />
+                    <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs">📞</span>
+                    </div>
                     <span className="text-gray-700">{businessData.phone}</span>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <Mail className="h-5 w-5 text-black" />
+                    <div className="w-5 h-5 bg-black rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs">✉️</span>
+                    </div>
                     <span className="text-gray-700">{businessData.email}</span>
                   </div>
                 </div>
