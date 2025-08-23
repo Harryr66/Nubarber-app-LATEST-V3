@@ -58,8 +58,7 @@ export async function POST(request: NextRequest) {
     const token = jwt.sign(
       { 
         customerId: customerDoc.id, 
-        email: customerData.email,
-        name: customerData.name
+        email: customerData.email
       },
       JWT_SECRET,
       { expiresIn: '7d' }
@@ -72,9 +71,7 @@ export async function POST(request: NextRequest) {
       success: true,
       customer: {
         id: customerDoc.id,
-        name: customerData.name,
         email: customerData.email,
-        phone: customerData.phone,
         createdAt: customerData.createdAt
       }
     });

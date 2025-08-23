@@ -6,14 +6,14 @@ import bcrypt from 'bcryptjs';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, password } = body;
+    const { email, password } = body;
 
-    console.log('🔐 Customer registration attempt:', { email, name });
+    console.log('🔐 Customer registration attempt:', { email });
 
     // Basic validation
-    if (!email || !password || !name) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Email and password are required' },
         { status: 400 }
       );
     }
@@ -36,10 +36,8 @@ export async function POST(request: NextRequest) {
 
     // Create customer data
     const customerData = {
-      name: name.trim(),
       email: email.toLowerCase(),
       passwordHash,
-      phone: '',
       createdAt: serverTimestamp(),
       isActive: true,
       preferences: {
@@ -60,9 +58,7 @@ export async function POST(request: NextRequest) {
       success: true,
       customer: {
         id: customerRef.id,
-        name: customerData.name,
         email: customerData.email,
-        phone: customerData.phone,
         createdAt: new Date().toISOString()
       }
     });

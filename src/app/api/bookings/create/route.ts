@@ -7,7 +7,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { 
       customerId, 
-      customerName, 
       customerEmail, 
       serviceId, 
       serviceName, 
@@ -31,7 +30,6 @@ export async function POST(request: NextRequest) {
     // Create booking data
     const bookingData = {
       customerId,
-      customerName,
       customerEmail,
       serviceId,
       serviceName,
