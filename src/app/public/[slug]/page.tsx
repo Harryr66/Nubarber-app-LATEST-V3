@@ -27,6 +27,7 @@ export default function PublicPage({ params }: PublicPageProps) {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [tempCustomerName, setTempCustomerName] = useState("");
   const [tempCustomerEmail, setTempCustomerEmail] = useState("");
+  const [bookingSuccess, setBookingSuccess] = useState(false);
 
   // Load uploaded logo and business name from localStorage
   useEffect(() => {
@@ -183,9 +184,16 @@ export default function PublicPage({ params }: PublicPageProps) {
 
   const calendarData = generateCalendarData();
 
-  // Get available time slots for selected date and barber
+  // Get available time slots for selected date and barber - NOW CORRELATES WITH CALENDAR COLORS
   const getAvailableTimeSlots = (date: Date, barberId: string) => {
     if (!date || !barberId || date.getDay() === 0) return []; // Sunday closed or no barber selected
+    
+    // Find the calendar day data to get the actual capacity
+    const dayData = calendarData.find(day => 
+      day.date.toDateString() === date.toDateString()
+    );
+    
+    if (!dayData || dayData.isClosed) return [];
     
     const slots = [];
     const startHour = 9; // 9 AM
@@ -201,17 +209,24 @@ export default function PublicPage({ params }: PublicPageProps) {
     const barber = barberAvailability[barberId as keyof typeof barberAvailability];
     if (!barber) return [];
     
-    for (let hour = barber.start; hour < barber.end; hour++) {
+    // Calculate how many slots should be available based on calendar capacity
+    const totalPossibleSlots = barber.end - barber.start;
+    const availableSlotsCount = Math.round((dayData.capacity / 100) * totalPossibleSlots);
+    
+    // Generate slots based on actual calendar availability
+    let slotsGenerated = 0;
+    for (let hour = barber.start; hour < barber.end && slotsGenerated < availableSlotsCount; hour++) {
       // Check if this hour is busy for this barber
       const isBusy = barber.busyHours.includes(hour);
       
-      if (!isBusy && Math.random() > 0.2) { // 80% chance of availability if not busy
+      if (!isBusy) {
         slots.push({
           time: `${hour}:00`,
           displayTime: `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
           available: true,
           barberId: barberId
         });
+        slotsGenerated++;
       }
     }
     
@@ -477,87 +492,112 @@ export default function PublicPage({ params }: PublicPageProps) {
             
             {/* Modal Content */}
             <div className="p-6 space-y-4">
-              {/* Service Summary */}
-              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                <p className="text-sm text-gray-600 mb-1">Selected Service:</p>
-                <p className="font-semibold text-black">
-                  {businessData.services.find(s => s.id === selectedService)?.name} - ${businessData.services.find(s => s.id === selectedService)?.price}
-                </p>
-              </div>
-              
-              {/* Customer Details Form */}
-              <div className="space-y-3">
-                <div>
-                  <Label htmlFor="modal-name" className="text-sm font-semibold text-black">Your Name</Label>
-                  <Input
-                    id="modal-name"
-                    type="text"
-                    value={tempCustomerName}
-                    onChange={(e) => setTempCustomerName(e.target.value)}
-                    className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
-                    placeholder="Enter your full name"
-                  />
+              {!bookingSuccess ? (
+                <>
+                  {/* Service Summary */}
+                  <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-600 mb-1">Selected Service:</p>
+                    <p className="font-semibold text-black">
+                      {businessData.services.find(s => s.id === selectedService)?.name} - ${businessData.services.find(s => s.id === selectedService)?.price}
+                    </p>
+                  </div>
+                  
+                  {/* Customer Details Form */}
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="modal-name" className="text-sm font-semibold text-black">Your Name</Label>
+                      <Input
+                        id="modal-name"
+                        type="text"
+                        value={tempCustomerName}
+                        onChange={(e) => setTempCustomerName(e.target.value)}
+                        className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                        placeholder="Enter your full name"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="modal-email" className="text-sm font-semibold text-black">Email Address</Label>
+                      <Input
+                        id="modal-email"
+                        type="email"
+                        value={tempCustomerEmail}
+                        onChange={(e) => setTempCustomerEmail(e.target.value)}
+                        className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                        placeholder="your@email.com"
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                /* Success State */
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-black mb-2">🎉 Booking Confirmed!</h3>
+                  <p className="text-gray-600 mb-4">
+                    Your appointment with {businessData.barbers.find(b => b.id === selectedBarber)?.name} has been booked successfully.
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    We'll send you a confirmation email shortly. This window will close automatically.
+                  </p>
                 </div>
-                
-                <div>
-                  <Label htmlFor="modal-email" className="text-sm font-semibold text-black">Email Address</Label>
-                  <Input
-                    id="modal-email"
-                    type="email"
-                    value={tempCustomerEmail}
-                    onChange={(e) => setTempCustomerEmail(e.target.value)}
-                    className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
-                    placeholder="your@email.com"
-                  />
-                </div>
-              </div>
+              )}
             </div>
             
             {/* Modal Footer */}
-            <div className="flex gap-3 p-4 border-t border-gray-200">
-              <button
-                onClick={() => {
-                  setShowBookingModal(false);
-                  setTempCustomerName("");
-                  setTempCustomerEmail("");
-                }}
-                className="flex-1 py-2 px-4 border-2 border-black text-black rounded-lg hover:bg-gray-50 transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  if (tempCustomerName && tempCustomerEmail) {
-                    setCustomerName(tempCustomerName);
-                    setCustomerEmail(tempCustomerEmail);
+            {!bookingSuccess && (
+              <div className="flex gap-3 p-4 border-t border-gray-200">
+                <button
+                  onClick={() => {
                     setShowBookingModal(false);
-                    
-                    // Simulate booking process
-                    setIsBooking(true);
-                    setTimeout(() => {
-                      setIsBooking(false);
-                      alert("🎉 Booking confirmed! We'll send you a confirmation email shortly.");
+                    setTempCustomerName("");
+                    setTempCustomerEmail("");
+                  }}
+                  className="flex-1 py-2 px-4 border-2 border-black text-black rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    if (tempCustomerName && tempCustomerEmail) {
+                      setCustomerName(tempCustomerName);
+                      setCustomerEmail(tempCustomerEmail);
                       
-                      // Reset form
-                      setSelectedService("");
-                      setSelectedDate(null);
-                      setSelectedTime("");
-                      setCustomerName("");
-                      setCustomerEmail("");
-                      setSelectedBarber("");
-                      setTempCustomerName("");
-                      setTempCustomerEmail("");
-                    }, 2000);
-                  } else {
-                    alert("Please fill in both name and email");
-                  }
-                }}
-                disabled={!tempCustomerName || !tempCustomerEmail}
-                className="flex-1 py-2 px-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Confirm & Book
-              </button>
-            </div>
+                      // Simulate booking process
+                      setIsBooking(true);
+                      setTimeout(() => {
+                        setIsBooking(false);
+                        setBookingSuccess(true);
+                        
+                        // Reset form after 3 seconds
+                        setTimeout(() => {
+                          setShowBookingModal(false);
+                          setBookingSuccess(false);
+                          setSelectedService("");
+                          setSelectedDate(null);
+                          setSelectedTime("");
+                          setCustomerName("");
+                          setCustomerEmail("");
+                          setSelectedBarber("");
+                          setTempCustomerName("");
+                          setTempCustomerEmail("");
+                        }, 3000);
+                      }, 2000);
+                    } else {
+                      alert("Please fill in both name and email");
+                    }
+                  }}
+                  disabled={!tempCustomerName || !tempCustomerEmail}
+                  className="flex-1 py-2 px-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isBooking ? "Processing..." : "Confirm & Book"}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
