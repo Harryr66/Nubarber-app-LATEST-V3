@@ -180,21 +180,34 @@ export default function PublicPage({ params }: PublicPageProps) {
 
   const calendarData = generateCalendarData();
 
-  // Get available time slots for selected date
-  const getAvailableTimeSlots = (date: Date) => {
-    if (!date || date.getDay() === 0) return []; // Sunday closed
+  // Get available time slots for selected date and barber
+  const getAvailableTimeSlots = (date: Date, barberId: string) => {
+    if (!date || !barberId || date.getDay() === 0) return []; // Sunday closed or no barber selected
     
     const slots = [];
     const startHour = 9; // 9 AM
     const endHour = 19; // 7 PM
     
-    for (let hour = startHour; hour < endHour; hour++) {
-      // Add some random availability for realism
-      if (Math.random() > 0.3) { // 70% chance of availability
+    // Simulate different availability patterns for different barbers
+    const barberAvailability = {
+      'barber1': { start: 9, end: 17, busyHours: [12, 13] }, // Mike: 9AM-5PM, busy at lunch
+      'barber2': { start: 10, end: 18, busyHours: [14, 15] }, // David: 10AM-6PM, busy mid-afternoon
+      'barber3': { start: 8, end: 16, busyHours: [10, 11] }  // Chris: 8AM-4PM, busy mid-morning
+    };
+    
+    const barber = barberAvailability[barberId as keyof typeof barberAvailability];
+    if (!barber) return [];
+    
+    for (let hour = barber.start; hour < barber.end; hour++) {
+      // Check if this hour is busy for this barber
+      const isBusy = barber.busyHours.includes(hour);
+      
+      if (!isBusy && Math.random() > 0.2) { // 80% chance of availability if not busy
         slots.push({
           time: `${hour}:00`,
           displayTime: `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
-          available: true
+          available: true,
+          barberId: barberId
         });
       }
     }
@@ -205,6 +218,12 @@ export default function PublicPage({ params }: PublicPageProps) {
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
     setSelectedTime(""); // Reset time when date changes
+  };
+
+  const handleBarberSelect = (barberId: string) => {
+    setSelectedBarber(barberId);
+    setSelectedDate(null); // Reset date when barber changes
+    setSelectedTime(""); // Reset time when barber changes
   };
 
   const handleBooking = async (e: React.FormEvent) => {
@@ -232,7 +251,7 @@ export default function PublicPage({ params }: PublicPageProps) {
     }, 2000);
   };
 
-  const availableTimeSlots = selectedDate ? getAvailableTimeSlots(selectedDate) : [];
+  const availableTimeSlots = selectedDate && selectedBarber ? getAvailableTimeSlots(selectedDate, selectedBarber) : [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -269,11 +288,6 @@ export default function PublicPage({ params }: PublicPageProps) {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-black mb-4">Book Your Next Appointment</h2>
-          <p className="text-lg text-gray-600">Professional barber services with easy online booking. Available 24/7 for your convenience.</p>
-        </div>
-
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Left Column - Services */}
           <div className="space-y-6">
@@ -306,7 +320,28 @@ export default function PublicPage({ params }: PublicPageProps) {
             {/* Heat Map Calendar */}
             <div className="bg-white border-2 border-black rounded-lg p-6 shadow-lg">
               <h3 className="text-2xl font-bold text-black mb-4">Availability Calendar</h3>
-              <p className="text-gray-600 mb-4">Select a date to see available times</p>
+              <p className="text-gray-600 mb-4">Select a barber and date to see available times</p>
+              
+              {/* Barber Selection */}
+              <div className="mb-4">
+                <Label className="text-sm font-semibold text-black mb-2 block">Select Your Barber</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {businessData.barbers.map((barber) => (
+                    <button
+                      key={barber.id}
+                      onClick={() => handleBarberSelect(barber.id)}
+                      className={`p-3 rounded-lg border-2 transition-all duration-200 ${
+                        selectedBarber === barber.id
+                          ? 'border-black bg-black text-white'
+                          : 'border-gray-300 bg-white text-black hover:border-black'
+                      }`}
+                    >
+                      <div className="text-sm font-semibold">{barber.name}</div>
+                      <div className="text-xs opacity-80">{barber.specialties.join(', ')}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
               
               {/* Heat Map Calendar */}
               <div className="grid grid-cols-7 gap-1 mb-6">
@@ -315,9 +350,9 @@ export default function PublicPage({ params }: PublicPageProps) {
                     key={index}
                     className={`aspect-square rounded-lg text-xs font-medium flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 ${
                       day.isToday ? 'ring-2 ring-black ring-offset-2' : ''
-                    } ${day.colorClass}`}
+                    } ${day.colorClass} ${!selectedBarber ? 'opacity-50 cursor-not-allowed' : ''}`}
                     title={`${day.date.toLocaleDateString()}: ${day.status} - ${day.capacity}% available`}
-                    onClick={() => handleDateSelect(day.date)}
+                    onClick={() => selectedBarber && handleDateSelect(day.date)}
                   >
                     <div className="text-xs font-bold">
                       {day.date.getDate()}
@@ -351,11 +386,11 @@ export default function PublicPage({ params }: PublicPageProps) {
               </div>
             </div>
 
-            {/* Available Time Slots - Shows when date is selected */}
-            {selectedDate && availableTimeSlots.length > 0 && (
+            {/* Available Time Slots - Shows when date and barber are selected */}
+            {selectedDate && selectedBarber && availableTimeSlots.length > 0 && (
               <div className="bg-white border-2 border-black rounded-lg p-6 shadow-lg">
                 <h3 className="text-xl font-bold text-black mb-4">
-                  Available Times for {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                  Available Times with {businessData.barbers.find(b => b.id === selectedBarber)?.name} on {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                 </h3>
                 <div className="grid grid-cols-3 gap-2">
                   {availableTimeSlots.map((slot, index) => (
@@ -372,6 +407,17 @@ export default function PublicPage({ params }: PublicPageProps) {
                     </button>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* No Availability Message */}
+            {selectedDate && selectedBarber && availableTimeSlots.length === 0 && (
+              <div className="bg-white border-2 border-gray-300 rounded-lg p-6 shadow-lg">
+                <h3 className="text-xl font-bold text-gray-600 mb-2">No Available Times</h3>
+                <p className="text-gray-500">
+                  {businessData.barbers.find(b => b.id === selectedBarber)?.name} is not available on {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}. 
+                  Please select a different date or barber.
+                </p>
               </div>
             )}
 
@@ -400,18 +446,18 @@ export default function PublicPage({ params }: PublicPageProps) {
                 </div>
 
                 <div>
-                  <Label htmlFor="date" className="text-black font-semibold">Select Date</Label>
+                  <Label htmlFor="date" className="text-black font-semibold">Selected Date</Label>
                   <Input
                     id="date"
-                    type="date"
-                    value={selectedDate ? selectedDate.toISOString().split('T')[0] : ''}
-                    onChange={(e) => setSelectedDate(e.target.value ? new Date(e.target.value) : null)}
-                    className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
-                    required
+                    type="text"
+                    value={selectedDate ? selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : ''}
+                    readOnly
+                    className="w-full p-3 border-2 border-black rounded-lg bg-gray-50 text-black"
+                    placeholder="Select a date from the calendar above"
                   />
-                  {selectedDate && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      Selected: {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                  {!selectedDate && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Please select a barber and date from the calendar above
                     </p>
                   )}
                 </div>
@@ -428,27 +474,26 @@ export default function PublicPage({ params }: PublicPageProps) {
                   />
                   {!selectedTime && (
                     <p className="text-sm text-gray-500 mt-1">
-                      Please select a date and time from the calendar above
+                      Please select a barber, date, and time from the calendar above
                     </p>
                   )}
                 </div>
 
                 <div>
-                  <Label htmlFor="barber" className="text-black font-semibold">Select Barber</Label>
-                  <select
+                  <Label htmlFor="barber" className="text-black font-semibold">Selected Barber</Label>
+                  <Input
                     id="barber"
-                    value={selectedBarber}
-                    onChange={(e) => setSelectedBarber(e.target.value)}
-                    className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
-                    required
-                  >
-                    <option value="">Choose a barber...</option>
-                    {businessData.barbers.map((barber) => (
-                      <option key={barber.id} value={barber.id}>
-                        {barber.name} ({barber.specialties.join(', ')})
-                      </option>
-                    ))}
-                  </select>
+                    type="text"
+                    value={selectedBarber ? businessData.barbers.find(b => b.id === selectedBarber)?.name : ''}
+                    readOnly
+                    className="w-full p-3 border-2 border-black rounded-lg bg-gray-50 text-black"
+                    placeholder="Select a barber from the calendar above"
+                  />
+                  {!selectedBarber && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Please select a barber from the calendar above
+                    </p>
+                  )}
                 </div>
 
                 <div>
