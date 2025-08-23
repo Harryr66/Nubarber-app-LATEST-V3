@@ -27,6 +27,7 @@ export default function PublicPage({ params }: PublicPageProps) {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [tempCustomerName, setTempCustomerName] = useState("");
   const [tempCustomerEmail, setTempCustomerEmail] = useState("");
+  const [tempCustomerPassword, setTempCustomerPassword] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [showCustomerAuth, setShowCustomerAuth] = useState(false);
   const [customerAccount, setCustomerAccount] = useState<any>(null);
@@ -266,7 +267,6 @@ export default function PublicPage({ params }: PublicPageProps) {
   // Customer authentication functions
   const handleCustomerLogin = async (email: string, password: string) => {
     try {
-      // In production, this would call your backend API
       const response = await fetch('/api/customer/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -282,28 +282,17 @@ export default function PublicPage({ params }: PublicPageProps) {
         // Load customer's bookings
         await loadCustomerBookings(customerData.customer.id);
       } else {
-        alert('Login failed. Please check your credentials.');
+        const errorData = await response.json();
+        alert(`Login failed: ${errorData.error}`);
       }
     } catch (error) {
-      // For demo purposes, create a mock customer account
-      const mockCustomer = {
-        id: `customer_${Date.now()}`,
-        name: tempCustomerName,
-        email: email,
-        phone: customerPhone
-      };
-      setCustomerAccount(mockCustomer);
-      setIsCustomerLoggedIn(true);
-      setShowCustomerAuth(false);
-      
-      // Load mock bookings
-      await loadCustomerBookings(mockCustomer.id);
+      console.error('Login error:', error);
+      alert('Login failed. Please try again.');
     }
   };
 
   const handleCustomerRegistration = async (name: string, email: string, password: string) => {
     try {
-      // In production, this would call your backend API
       const response = await fetch('/api/customer/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -319,77 +308,35 @@ export default function PublicPage({ params }: PublicPageProps) {
         // Load customer's bookings
         await loadCustomerBookings(customerData.customer.id);
       } else {
-        alert('Registration failed. Please try again.');
+        const errorData = await response.json();
+        alert(`Registration failed: ${errorData.error}`);
       }
     } catch (error) {
-      // For demo purposes, create a mock customer account
-      const mockCustomer = {
-        id: `customer_${Date.now()}`,
-        name: name,
-        email: email,
-        phone: customerPhone
-      };
-      setCustomerAccount(mockCustomer);
-      setIsCustomerLoggedIn(true);
-      setShowCustomerAuth(false);
-      
-      // Load mock bookings
-      await loadCustomerBookings(mockCustomer.id);
+      console.error('Registration error:', error);
+      alert('Registration failed. Please try again.');
     }
   };
 
   const loadCustomerBookings = async (customerId: string) => {
     try {
-      // In production, this would call your backend API
       const response = await fetch(`/api/customer/${customerId}/bookings`);
       
       if (response.ok) {
-        const bookings = await response.json();
-        setCustomerBookings(bookings);
+        const data = await response.json();
+        setCustomerBookings(data.bookings);
       } else {
-        // For demo purposes, create mock bookings
-        const mockBookings = [
-          {
-            id: `booking_${Date.now()}`,
-            service: businessData.services.find(s => s.id === selectedService)?.name,
-            barber: businessData.barbers.find(b => b.id === selectedBarber)?.name,
-            date: selectedDate?.toLocaleDateString(),
-            time: availableTimeSlots.find(slot => slot.time === selectedTime)?.displayTime,
-            status: 'confirmed',
-            createdAt: new Date().toISOString()
-          }
-        ];
-        setCustomerBookings(mockBookings);
+        const errorData = await response.json();
+        console.error('Failed to load bookings:', errorData.error);
+        setCustomerBookings([]);
       }
     } catch (error) {
-      // For demo purposes, create mock bookings
-      const mockBookings = [
-        {
-          id: `booking_${Date.now()}`,
-          service: businessData.services.find(s => s.id === selectedService)?.name,
-          barber: businessData.barbers.find(b => b.id === selectedBarber)?.name,
-          date: selectedDate?.toLocaleDateString(),
-          time: availableTimeSlots.find(slot => slot.time === selectedTime)?.displayTime,
-          status: 'confirmed',
-          createdAt: new Date().toISOString()
-        }
-      ];
-      setCustomerBookings(mockBookings);
+      console.error('Error loading bookings:', error);
+      setCustomerBookings([]);
     }
   };
 
   const cancelBooking = async (bookingId: string, appointmentDate: string) => {
-    const appointmentDateTime = new Date(appointmentDate);
-    const now = new Date();
-    const hoursDifference = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
-    
-    if (hoursDifference < 24) {
-      alert('Bookings can only be cancelled at least 24 hours before the appointment.');
-      return;
-    }
-    
     try {
-      // In production, this would call your backend API
       const response = await fetch(`/api/customer/bookings/${bookingId}/cancel`, {
         method: 'DELETE'
       });
@@ -399,12 +346,63 @@ export default function PublicPage({ params }: PublicPageProps) {
         setCustomerBookings(prev => prev.filter(booking => booking.id !== bookingId));
         alert('Booking cancelled successfully.');
       } else {
-        alert('Failed to cancel booking. Please try again.');
+        const errorData = await response.json();
+        alert(`Failed to cancel booking: ${errorData.error}`);
       }
     } catch (error) {
-      // For demo purposes, remove from local state
-      setCustomerBookings(prev => prev.filter(booking => booking.id !== bookingId));
-      alert('Booking cancelled successfully.');
+      console.error('Error cancelling booking:', error);
+      alert('Failed to cancel booking. Please try again.');
+    }
+  };
+
+  const createBooking = async () => {
+    try {
+      const appointmentDateTime = new Date(selectedDate!);
+      const [hours, minutes] = selectedTime!.split(':');
+      appointmentDateTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+      const bookingData = {
+        customerId: customerAccount.id,
+        customerName: customerAccount.name,
+        customerEmail: customerAccount.email,
+        serviceId: selectedService,
+        serviceName: businessData.services.find(s => s.id === selectedService)?.name,
+        barberId: selectedBarber,
+        barberName: businessData.barbers.find(b => b.id === selectedBarber)?.name,
+        appointmentDate: selectedDate?.toLocaleDateString(),
+        appointmentTime: availableTimeSlots.find(slot => slot.time === selectedTime)?.displayTime,
+        appointmentDateTime: appointmentDateTime.toISOString()
+      };
+
+      const response = await fetch('/api/bookings/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        
+        // Add new booking to local state
+        setCustomerBookings(prev => [data.booking, ...prev]);
+        setShowCustomerAuth(false);
+        setBookingSuccess(true);
+        
+        // Reset form after 3 seconds
+        setTimeout(() => {
+          setBookingSuccess(false);
+          setSelectedService("");
+          setSelectedDate(null);
+          setSelectedTime("");
+          setSelectedBarber("");
+        }, 3000);
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to create booking: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error('Error creating booking:', error);
+      alert('Failed to create booking. Please try again.');
     }
   };
 
@@ -772,6 +770,8 @@ export default function PublicPage({ params }: PublicPageProps) {
                       <Input
                         id="auth-password"
                         type="password"
+                        value={tempCustomerPassword}
+                        onChange={(e) => setTempCustomerPassword(e.target.value)}
                         className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
                         placeholder="Enter your password"
                       />
@@ -781,13 +781,13 @@ export default function PublicPage({ params }: PublicPageProps) {
                   {/* Action Buttons */}
                   <div className="flex gap-3 pt-4">
                     <button
-                      onClick={() => handleCustomerLogin(tempCustomerEmail, 'demo123')}
+                      onClick={() => handleCustomerLogin(tempCustomerEmail, tempCustomerPassword)}
                       className="flex-1 py-2 px-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
                     >
                       Sign In
                     </button>
                     <button
-                      onClick={() => handleCustomerRegistration(tempCustomerName, tempCustomerEmail, 'demo123')}
+                      onClick={() => handleCustomerRegistration(tempCustomerName, tempCustomerEmail, tempCustomerPassword)}
                       className="flex-1 py-2 px-4 border-2 border-black text-black rounded-lg hover:bg-gray-50 transition-colors font-medium"
                     >
                       Create Account
@@ -828,31 +828,7 @@ export default function PublicPage({ params }: PublicPageProps) {
                   {/* Complete Current Booking */}
                   <div className="pt-4 border-t border-gray-200">
                     <button
-                      onClick={() => {
-                        // Complete the current booking
-                        const newBooking = {
-                          id: `booking_${Date.now()}`,
-                          service: businessData.services.find(s => s.id === selectedService)?.name,
-                          barber: businessData.barbers.find(b => b.id === selectedBarber)?.name,
-                          date: selectedDate?.toLocaleDateString(),
-                          time: availableTimeSlots.find(slot => slot.time === selectedTime)?.displayTime,
-                          status: 'confirmed',
-                          createdAt: new Date().toISOString()
-                        };
-                        
-                        setCustomerBookings(prev => [newBooking, ...prev]);
-                        setShowCustomerAuth(false);
-                        setBookingSuccess(true);
-                        
-                        // Reset form after 3 seconds
-                        setTimeout(() => {
-                          setBookingSuccess(false);
-                          setSelectedService("");
-                          setSelectedDate(null);
-                          setSelectedTime("");
-                          setSelectedBarber("");
-                        }, 3000);
-                      }}
+                      onClick={createBooking}
                       className="w-full py-2 px-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
                     >
                       Complete Current Booking
