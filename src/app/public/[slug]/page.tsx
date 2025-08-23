@@ -24,6 +24,9 @@ export default function PublicPage({ params }: PublicPageProps) {
   const [logoUrl, setLogoUrl] = useState<string>("");
   const [businessName, setBusinessName] = useState("Harrys Barbers");
   const [selectedBarber, setSelectedBarber] = useState("");
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [tempCustomerName, setTempCustomerName] = useState("");
+  const [tempCustomerEmail, setTempCustomerEmail] = useState("");
 
   // Load uploaded logo and business name from localStorage
   useEffect(() => {
@@ -437,28 +440,7 @@ export default function PublicPage({ params }: PublicPageProps) {
               {selectedService && selectedTime && selectedBarber && (
                 <div className="pt-4 border-t border-gray-200">
                   <button
-                    onClick={() => {
-                      // Show booking confirmation modal/form
-                      const customerName = prompt("Enter your name:");
-                      const customerEmail = prompt("Enter your email:");
-                      if (customerName && customerEmail) {
-                        setCustomerName(customerName);
-                        setCustomerEmail(customerEmail);
-                        // Simulate booking
-                        setIsBooking(true);
-                        setTimeout(() => {
-                          setIsBooking(false);
-                          alert("Booking confirmed! We'll send you a confirmation email shortly.");
-                          // Reset form
-                          setSelectedService("");
-                          setSelectedDate(null);
-                          setSelectedTime("");
-                          setCustomerName("");
-                          setCustomerEmail("");
-                          setSelectedBarber("");
-                        }, 2000);
-                      }
-                    }}
+                    onClick={() => setShowBookingModal(true)}
                     className="w-full bg-black text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-colors duration-200"
                   >
                     Confirm Booking
@@ -480,6 +462,105 @@ export default function PublicPage({ params }: PublicPageProps) {
           </div>
         </div>
       </main>
+
+      {/* Custom Booking Confirmation Modal */}
+      {showBookingModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full border-2 border-black">
+            {/* Modal Header */}
+            <div className="bg-black text-white p-4 rounded-t-lg">
+              <h3 className="text-xl font-bold">Confirm Your Booking</h3>
+              <p className="text-sm text-gray-300 mt-1">
+                {businessData.barbers.find(b => b.id === selectedBarber)?.name} • {selectedDate?.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })} • {availableTimeSlots.find(slot => slot.time === selectedTime)?.displayTime}
+              </p>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="p-6 space-y-4">
+              {/* Service Summary */}
+              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                <p className="text-sm text-gray-600 mb-1">Selected Service:</p>
+                <p className="font-semibold text-black">
+                  {businessData.services.find(s => s.id === selectedService)?.name} - ${businessData.services.find(s => s.id === selectedService)?.price}
+                </p>
+              </div>
+              
+              {/* Customer Details Form */}
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="modal-name" className="text-sm font-semibold text-black">Your Name</Label>
+                  <Input
+                    id="modal-name"
+                    type="text"
+                    value={tempCustomerName}
+                    onChange={(e) => setTempCustomerName(e.target.value)}
+                    className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="modal-email" className="text-sm font-semibold text-black">Email Address</Label>
+                  <Input
+                    id="modal-email"
+                    type="email"
+                    value={tempCustomerEmail}
+                    onChange={(e) => setTempCustomerEmail(e.target.value)}
+                    className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                    placeholder="your@email.com"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="flex gap-3 p-4 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  setShowBookingModal(false);
+                  setTempCustomerName("");
+                  setTempCustomerEmail("");
+                }}
+                className="flex-1 py-2 px-4 border-2 border-black text-black rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (tempCustomerName && tempCustomerEmail) {
+                    setCustomerName(tempCustomerName);
+                    setCustomerEmail(tempCustomerEmail);
+                    setShowBookingModal(false);
+                    
+                    // Simulate booking process
+                    setIsBooking(true);
+                    setTimeout(() => {
+                      setIsBooking(false);
+                      alert("🎉 Booking confirmed! We'll send you a confirmation email shortly.");
+                      
+                      // Reset form
+                      setSelectedService("");
+                      setSelectedDate(null);
+                      setSelectedTime("");
+                      setCustomerName("");
+                      setCustomerEmail("");
+                      setSelectedBarber("");
+                      setTempCustomerName("");
+                      setTempCustomerEmail("");
+                    }, 2000);
+                  } else {
+                    alert("Please fill in both name and email");
+                  }
+                }}
+                disabled={!tempCustomerName || !tempCustomerEmail}
+                className="flex-1 py-2 px-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Confirm & Book
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
