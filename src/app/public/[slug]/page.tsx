@@ -266,6 +266,12 @@ export default function PublicPage({ params }: PublicPageProps) {
 
   // Customer authentication functions
   const handleCustomerLogin = async (email: string, password: string) => {
+    // Validate required fields
+    if (!email.trim() || !password.trim()) {
+      alert('Please fill in both Email and Password');
+      return;
+    }
+
     try {
       const response = await fetch('/api/customer/login', {
         method: 'POST',
@@ -292,6 +298,12 @@ export default function PublicPage({ params }: PublicPageProps) {
   };
 
   const handleCustomerRegistration = async (name: string, email: string, password: string) => {
+    // Validate required fields
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      alert('Please fill in all required fields: Name, Email, and Password');
+      return;
+    }
+
     try {
       const response = await fetch('/api/customer/register', {
         method: 'POST',
@@ -753,6 +765,18 @@ export default function PublicPage({ params }: PublicPageProps) {
                 <>
                   {/* Login Form */}
                   <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="auth-name" className="text-sm font-semibold text-black">Full Name</Label>
+                      <Input
+                        id="auth-name"
+                        type="text"
+                        value={tempCustomerName}
+                        onChange={(e) => setTempCustomerName(e.target.value)}
+                        className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                        placeholder="Enter your full name"
+                      />
+                    </div>
+                    
                     <div>
                       <Label htmlFor="auth-email" className="text-sm font-semibold text-black">Email Address</Label>
                       <Input
