@@ -337,42 +337,6 @@ export default function PublicSitePage() {
                 </CardContent>
             </Card>
         </div>
-        <div className="space-y-4 md:space-y-6">
-            <Card>
-                <CardHeader className="pb-4 md:pb-6">
-                    <CardTitle className="text-lg md:text-xl">Your Booking URL</CardTitle>
-                    <CardDescription className="text-sm md:text-base">Share this link with your clients.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="space-y-3">
-                      {/* White Label URL */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 md:p-4 text-xs md:text-sm text-blue-900">
-                        <p><strong>White-Label URL:</strong> <span className="break-all">{whiteLabelUrl}</span></p>
-                        <p className="text-xs mt-1">Future domain (requires DNS setup)</p>
-                      </div>
-                      
-                      {/* Working URL */}
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-3 md:p-4 text-xs md:text-sm text-green-900">
-                        <p><strong>Working URL:</strong> <span className="break-all">{workingUrl}</span></p>
-                        <p className="text-xs mt-1">Ready to use now - share with customers</p>
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-3 md:space-y-4">
-                      <Label className="text-sm md:text-base">Copy Working URL</Label>
-                      <div className="flex flex-col sm:flex-row items-center gap-2">
-                          <Input readOnly value={workingUrl} className="h-10 md:h-11 text-sm" />
-                          <Button variant="ghost" size="icon" className="w-full sm:w-auto h-10 md:h-11" onClick={handleCopyUrl}>
-                              <Copy className="h-4 w-4" />
-                          </Button>
-                      </div>
-                      <p className="text-xs md:text-sm text-muted-foreground text-center">
-                        Copy this URL to share with your customers
-                      </p>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
       </div>
     </div>
   );
