@@ -315,17 +315,17 @@ export default function PublicPage({ params }: PublicPageProps) {
             </div>
           </div>
 
-          {/* Right Column - Booking Form */}
+          {/* Right Column - Integrated Calendar & Booking */}
           <div className="space-y-6">
-            {/* Heat Map Calendar */}
+            {/* Integrated Calendar & Booking Section */}
             <div className="bg-white border-2 border-black rounded-lg p-6 shadow-lg">
-              <h3 className="text-2xl font-bold text-black mb-4">Availability Calendar</h3>
-              <p className="text-gray-600 mb-4">Select a barber and date to see available times</p>
+              <h3 className="text-2xl font-bold text-black mb-4">Book Your Appointment</h3>
+              <p className="text-gray-600 mb-6">Select your barber, date, and time to book</p>
               
               {/* Barber Selection */}
-              <div className="mb-4">
-                <Label className="text-sm font-semibold text-black mb-2 block">Select Your Barber</Label>
-                <div className="grid grid-cols-3 gap-2">
+              <div className="mb-6">
+                <Label className="text-sm font-semibold text-black mb-3 block">1. Select Your Barber</Label>
+                <div className="grid grid-cols-3 gap-3">
                   {businessData.barbers.map((barber) => (
                     <button
                       key={barber.id}
@@ -343,92 +343,79 @@ export default function PublicPage({ params }: PublicPageProps) {
                 </div>
               </div>
               
-              {/* Heat Map Calendar */}
-              <div className="grid grid-cols-7 gap-1 mb-6">
-                {calendarData.map((day, index) => (
-                  <div
-                    key={index}
-                    className={`aspect-square rounded-lg text-xs font-medium flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 ${
-                      day.isToday ? 'ring-2 ring-black ring-offset-2' : ''
-                    } ${day.colorClass} ${!selectedBarber ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    title={`${day.date.toLocaleDateString()}: ${day.status} - ${day.capacity}% available`}
-                    onClick={() => selectedBarber && handleDateSelect(day.date)}
-                  >
-                    <div className="text-xs font-bold">
-                      {day.date.getDate()}
+              {/* Calendar Section */}
+              {selectedBarber && (
+                <div className="mb-6">
+                  <Label className="text-sm font-semibold text-black mb-3 block">2. Select Date</Label>
+                  <div className="grid grid-cols-7 gap-1 mb-4">
+                    {calendarData.map((day, index) => (
+                      <div
+                        key={index}
+                        className={`aspect-square rounded-lg text-xs font-medium flex flex-col items-center justify-center cursor-pointer transition-all duration-200 hover:scale-105 ${
+                          day.isToday ? 'ring-2 ring-black ring-offset-2' : ''
+                        } ${day.colorClass}`}
+                        title={`${day.date.toLocaleDateString()}: ${day.status} - ${day.capacity}% available`}
+                        onClick={() => handleDateSelect(day.date)}
+                      >
+                        <div className="text-xs font-bold">
+                          {day.date.getDate()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Calendar Legend */}
+                  <div className="grid grid-cols-5 gap-2 mb-4">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-green-500 rounded"></div>
+                      <span className="text-xs text-black">Wide Open</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-green-400 rounded"></div>
+                      <span className="text-xs text-black">Good</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-orange-500 rounded"></div>
+                      <span className="text-xs text-black">Moderate</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-red-500 rounded"></div>
+                      <span className="text-xs text-black">Limited</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-3 h-3 bg-gray-300 rounded"></div>
+                      <span className="text-xs text-black">Closed</span>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
               
-              {/* Premium Legend */}
-              <div className="grid grid-cols-5 gap-2 mb-4">
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 bg-green-500 rounded"></div>
-                  <span className="text-xs text-black">Wide Open</span>
+              {/* Time Slots Section */}
+              {selectedDate && selectedBarber && availableTimeSlots.length > 0 && (
+                <div className="mb-6">
+                  <Label className="text-sm font-semibold text-black mb-3 block">3. Select Time</Label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {availableTimeSlots.map((slot, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedTime(slot.time)}
+                        className={`p-3 rounded-lg border-2 transition-all duration-200 ${
+                          selectedTime === slot.time
+                            ? 'border-black bg-black text-white'
+                            : 'border-gray-300 bg-white text-black hover:border-black'
+                        }`}
+                      >
+                        {slot.displayTime}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 bg-green-400 rounded"></div>
-                  <span className="text-xs text-black">Good</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 bg-orange-500 rounded"></div>
-                  <span className="text-xs text-black">Moderate</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 bg-red-500 rounded"></div>
-                  <span className="text-xs text-black">Limited</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 bg-gray-300 rounded"></div>
-                  <span className="text-xs text-black">Closed</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Available Time Slots - Shows when date and barber are selected */}
-            {selectedDate && selectedBarber && availableTimeSlots.length > 0 && (
-              <div className="bg-white border-2 border-black rounded-lg p-6 shadow-lg">
-                <h3 className="text-xl font-bold text-black mb-4">
-                  Available Times with {businessData.barbers.find(b => b.id === selectedBarber)?.name} on {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                </h3>
-                <div className="grid grid-cols-3 gap-2">
-                  {availableTimeSlots.map((slot, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedTime(slot.time)}
-                      className={`p-3 rounded-lg border-2 transition-all duration-200 ${
-                        selectedTime === slot.time
-                          ? 'border-black bg-black text-white'
-                          : 'border-gray-300 bg-white text-black hover:border-black'
-                      }`}
-                    >
-                      {slot.displayTime}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* No Availability Message */}
-            {selectedDate && selectedBarber && availableTimeSlots.length === 0 && (
-              <div className="bg-white border-2 border-gray-300 rounded-lg p-6 shadow-lg">
-                <h3 className="text-xl font-bold text-gray-600 mb-2">No Available Times</h3>
-                <p className="text-gray-500">
-                  {businessData.barbers.find(b => b.id === selectedBarber)?.name} is not available on {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}. 
-                  Please select a different date or barber.
-                </p>
-              </div>
-            )}
-
-            {/* Booking Form */}
-            <div className="bg-white border-2 border-black rounded-lg p-6 shadow-lg">
-              <h3 className="text-2xl font-bold text-black mb-4">Book Appointment</h3>
-              <p className="text-gray-600 mb-6">Select a service and time that works for you.</p>
+              )}
               
-              <form onSubmit={handleBooking} className="space-y-4">
-                <div>
-                  <Label htmlFor="service" className="text-black font-semibold">Select Service</Label>
+              {/* Service Selection */}
+              {selectedTime && (
+                <div className="mb-6">
+                  <Label className="text-sm font-semibold text-black mb-3 block">4. Select Service</Label>
                   <select
                     id="service"
                     value={selectedService}
@@ -444,127 +431,51 @@ export default function PublicPage({ params }: PublicPageProps) {
                     ))}
                   </select>
                 </div>
-
-                <div>
-                  <Label htmlFor="date" className="text-black font-semibold">Selected Date</Label>
-                  <Input
-                    id="date"
-                    type="text"
-                    value={selectedDate ? selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : ''}
-                    readOnly
-                    className="w-full p-3 border-2 border-black rounded-lg bg-gray-50 text-black"
-                    placeholder="Select a date from the calendar above"
-                  />
-                  {!selectedDate && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      Please select a barber and date from the calendar above
-                    </p>
-                  )}
+              )}
+              
+              {/* Next Button - Only show when all selections are made */}
+              {selectedService && selectedTime && selectedBarber && (
+                <div className="pt-4 border-t border-gray-200">
+                  <button
+                    onClick={() => {
+                      // Show booking confirmation modal/form
+                      const customerName = prompt("Enter your name:");
+                      const customerEmail = prompt("Enter your email:");
+                      if (customerName && customerEmail) {
+                        setCustomerName(customerName);
+                        setCustomerEmail(customerEmail);
+                        // Simulate booking
+                        setIsBooking(true);
+                        setTimeout(() => {
+                          setIsBooking(false);
+                          alert("Booking confirmed! We'll send you a confirmation email shortly.");
+                          // Reset form
+                          setSelectedService("");
+                          setSelectedDate(null);
+                          setSelectedTime("");
+                          setCustomerName("");
+                          setCustomerEmail("");
+                          setSelectedBarber("");
+                        }, 2000);
+                      }
+                    }}
+                    className="w-full bg-black text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-colors duration-200"
+                  >
+                    Confirm Booking
+                  </button>
                 </div>
-
-                <div>
-                  <Label htmlFor="time" className="text-black font-semibold">Selected Time</Label>
-                  <Input
-                    id="time"
-                    type="text"
-                    value={selectedTime ? availableTimeSlots.find(slot => slot.time === selectedTime)?.displayTime || selectedTime : ''}
-                    readOnly
-                    className="w-full p-3 border-2 border-black rounded-lg bg-gray-50 text-black"
-                    placeholder="Select a time from the calendar above"
-                  />
-                  {!selectedTime && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      Please select a barber, date, and time from the calendar above
-                    </p>
-                  )}
+              )}
+              
+              {/* No Availability Message */}
+              {selectedDate && selectedBarber && availableTimeSlots.length === 0 && (
+                <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
+                  <h4 className="text-lg font-semibold text-gray-600 mb-2">No Available Times</h4>
+                  <p className="text-gray-500 text-sm">
+                    {businessData.barbers.find(b => b.id === selectedBarber)?.name} is not available on {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}. 
+                    Please select a different date or barber.
+                  </p>
                 </div>
-
-                <div>
-                  <Label htmlFor="barber" className="text-black font-semibold">Selected Barber</Label>
-                  <Input
-                    id="barber"
-                    type="text"
-                    value={selectedBarber ? businessData.barbers.find(b => b.id === selectedBarber)?.name : ''}
-                    readOnly
-                    className="w-full p-3 border-2 border-black rounded-lg bg-gray-50 text-black"
-                    placeholder="Select a barber from the calendar above"
-                  />
-                  {!selectedBarber && (
-                    <p className="text-sm text-gray-500 mt-1">
-                      Please select a barber from the calendar above
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="name" className="text-black font-semibold">Your Name</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={customerName}
-                    onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
-                    placeholder="Enter your full name"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="email" className="text-black font-semibold">Email Address</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
-                    placeholder="your@email.com"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="phone" className="text-black font-semibold">Phone Number (Optional)</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  disabled={isBooking}
-                  className="w-full bg-black text-white hover:bg-gray-800 py-3 text-lg font-semibold border-2 border-black rounded-lg transition-colors duration-200"
-                >
-                  {isBooking ? "Booking..." : "Book Appointment"}
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
-
-        {/* Contact Information */}
-        <div className="mt-12 bg-white border-2 border-black rounded-lg p-6 shadow-lg">
-          <h3 className="text-2xl font-bold text-black mb-4">Contact Information</h3>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="flex items-center space-x-3">
-              <MapPin className="w-5 h-5 text-black" />
-              <span className="text-black">{businessData.address}</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Phone className="w-5 h-5 text-black" />
-              <span className="text-black">{businessData.phone}</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Mail className="w-5 h-5 text-black" />
-              <span className="text-black">{businessData.email}</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Clock className="w-5 h-5 text-black" />
-              <span className="text-black">Mon-Fri: 9AM-7PM, Sat: 9AM-5PM</span>
+              )}
             </div>
           </div>
         </div>
