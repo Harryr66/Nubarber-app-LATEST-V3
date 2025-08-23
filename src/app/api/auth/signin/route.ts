@@ -1,96 +1,110 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AuthService, initializeDemoUser } from '@/lib/auth';
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { db } from '@/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import jwt from 'jsonwebtoken';
 
-interface SignInRequest {
-  email: string;
-  password: string;
-}
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 
 export async function POST(request: NextRequest) {
   try {
-    // Initialize demo user on first request (remove in production)
-    await initializeDemoUser();
-
-    const body: SignInRequest = await request.json();
+    const body = await request.json();
     const { email, password } = body;
 
-    // Validate input
+    console.log('🔐 Signin attempt for:', email);
+
+    // Validate required fields
     if (!email || !password) {
       return NextResponse.json(
-        { message: 'Email and password are required' },
+        { error: 'Email and password are required' },
         { status: 400 }
       );
     }
 
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Authenticate with Firebase
+    const auth = getAuth();
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const firebaseUser = userCredential.user;
+
+    console.log('✅ Firebase authentication successful for:', firebaseUser.uid);
+
+    // Get user data from Firestore
+    const userRef = doc(db, 'users', firebaseUser.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      console.error('❌ User document not found in Firestore');
       return NextResponse.json(
-        { message: 'Invalid email format' },
-        { status: 400 }
+        { error: 'User data not found' },
+        { status: 404 }
       );
     }
 
-    // Validate password presence
-    if (password.trim().length === 0) {
-      return NextResponse.json(
-        { message: 'Password is required' },
-        { status: 400 }
-      );
-    }
+    const userData = userSnap.data();
 
-    try {
-      // Authenticate user with secure service
-      const { user, token } = await AuthService.authenticateUser(email, password);
+    // Create JWT token
+    const token = jwt.sign(
+      { 
+        userId: firebaseUser.uid, 
+        email: firebaseUser.email,
+        shopName: userData.shopName,
+        region: userData.region
+      },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
 
-      // Set HTTP-only cookie with JWT token
-      const response = NextResponse.json({
-        success: true,
-        user: {
-          id: user.id,
-          email: user.email,
-          shopName: user.shopName,
-          role: user.role
-        },
-        message: 'Authentication successful'
-      });
+    console.log('✅ JWT token created for user:', firebaseUser.uid);
 
-      // Set secure HTTP-only cookie
-      response.cookies.set('auth-token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 24 * 60 * 60, // 24 hours
-        path: '/'
-      });
+    // Set JWT token in HTTP-only cookie
+    const response = NextResponse.json({
+      message: 'Sign in successful',
+      user: {
+        id: firebaseUser.uid,
+        email: firebaseUser.email,
+        shopName: userData.shopName,
+        locationType: userData.locationType,
+        businessAddress: userData.businessAddress,
+        staffCount: userData.staffCount,
+        region: userData.region,
+        currency: userData.currency,
+        timezone: userData.timezone,
+        createdAt: userData.createdAt
+      }
+    });
 
-      return response;
+    // Set the JWT token in an HTTP-only cookie
+    response.cookies.set('auth-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 // 24 hours
+    });
 
-    } catch (authError: any) {
-      // Handle specific authentication errors
-      if (authError.message.includes('Invalid credentials')) {
-        return NextResponse.json(
-          { message: 'Invalid email or password' },
-          { status: 401 }
-        );
-      } else if (authError.message.includes('locked')) {
-        return NextResponse.json(
-          { message: authError.message },
-          { status: 423 } // Locked
-        );
+    return response;
+
+  } catch (error) {
+    console.error('❌ Signin failed:', error);
+    
+    let errorMessage = 'Sign in failed';
+    
+    if (error instanceof Error) {
+      if (error.message.includes('user-not-found')) {
+        errorMessage = 'No account found with this email address';
+      } else if (error.message.includes('wrong-password')) {
+        errorMessage = 'Incorrect password';
+      } else if (error.message.includes('invalid-email')) {
+        errorMessage = 'Invalid email address';
+      } else if (error.message.includes('too-many-requests')) {
+        errorMessage = 'Too many failed attempts. Please try again later';
       } else {
-        return NextResponse.json(
-          { message: authError.message },
-          { status: 401 }
-        );
+        errorMessage = `Sign in failed: ${error.message}`;
       }
     }
 
-  } catch (error) {
-    console.error('Sign in error:', error);
     return NextResponse.json(
-      { message: 'Internal server error' },
-      { status: 500 }
+      { error: errorMessage },
+      { status: 401 }
     );
   }
 } 

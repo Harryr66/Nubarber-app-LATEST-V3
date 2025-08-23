@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/firebase';
 import { collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
@@ -18,14 +19,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Hash password
+    // Hash password for Firestore storage
     const saltRounds = 12;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
     // Generate user ID
     const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    // Create user data
+    // Create user data for Firestore
     const userData = {
       id: userId,
       email: email.toLowerCase(),
@@ -62,28 +63,41 @@ export async function POST(request: NextRequest) {
       }
     };
 
-    console.log('🔥 Attempting to create user in Firebase...');
+    console.log('🔥 Creating Firebase Authentication user...');
+    
+    // Create Firebase Authentication user
+    const auth = getAuth();
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const firebaseUser = userCredential.user;
+    
+    console.log('✅ Firebase Auth user created:', firebaseUser.uid);
 
-    // Try to create user document directly
-    const userRef = doc(db, 'users', userId);
-    await setDoc(userRef, userData);
+    console.log('🔥 Creating Firestore user document...');
 
-    console.log('✅ User created successfully in Firebase!');
+    // Create user document in Firestore
+    const userRef = doc(db, 'users', firebaseUser.uid); // Use Firebase Auth UID
+    await setDoc(userRef, {
+      ...userData,
+      id: firebaseUser.uid, // Use Firebase Auth UID as the user ID
+      firebaseAuthUid: firebaseUser.uid // Store the Firebase Auth UID
+    });
+
+    console.log('✅ Firestore user document created!');
 
     // Store password hash separately
-    const passwordRef = doc(db, 'passwords', email.toLowerCase());
+    const passwordRef = doc(db, 'passwords', firebaseUser.uid);
     await setDoc(passwordRef, { 
       passwordHash,
-      userId: userId,
+      userId: firebaseUser.uid,
       createdAt: serverTimestamp()
     });
 
     console.log('✅ Password hash stored successfully!');
 
     return NextResponse.json({
-      message: 'Account created successfully in Firebase!',
+      message: 'Account created successfully in Firebase Auth & Firestore!',
       user: {
-        id: userId,
+        id: firebaseUser.uid,
         email: userData.email,
         shopName: userData.shopName,
         locationType: userData.locationType,
@@ -106,7 +120,7 @@ export async function POST(request: NextRequest) {
       error: `Firebase signup failed: ${errorMessage}`,
       details: errorDetails,
       rawError: JSON.stringify(error),
-      suggestion: 'Check Firebase security rules - they are too restrictive'
+      suggestion: 'Check Firebase security rules and authentication setup'
     }, { status: 500 });
   }
 } 
