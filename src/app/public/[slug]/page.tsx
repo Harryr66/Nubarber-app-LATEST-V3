@@ -366,16 +366,14 @@ export default function PublicPage({ params }: PublicPageProps) {
         // Add new booking to local state
         setCustomerBookings(prev => [data.booking, ...prev]);
         setShowCustomerAuth(false);
+        
+        // Show success message briefly, then redirect to customer portal
         setBookingSuccess(true);
         
-        // Reset form after 3 seconds
         setTimeout(() => {
-          setBookingSuccess(false);
-          setSelectedService("");
-          setSelectedDate(null);
-          setSelectedTime("");
-          setSelectedBarber("");
-        }, 3000);
+          // Redirect to customer portal
+          window.location.href = '/customer-portal';
+        }, 2000);
       } else {
         const errorData = await response.json();
         alert(`Failed to create booking: ${errorData.error}`);
@@ -389,31 +387,53 @@ export default function PublicPage({ params }: PublicPageProps) {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-black text-white shadow-lg">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
+      <header className="bg-white border-b-2 border-black">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            {/* Logo and Business Name */}
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center overflow-hidden">
-                {logoUrl ? (
+              {logoUrl && (
+                <div className="w-12 h-12 relative">
                   <Image
                     src={logoUrl}
-                    alt={`${businessName} Logo`}
-                    width={64}
-                    height={64}
-                    className="w-full h-full object-cover"
+                    alt={`${businessName} logo`}
+                    fill
+                    className="object-contain"
                   />
-                ) : (
-                  <span className="text-black text-2xl font-bold">H</span>
-                )}
-              </div>
+                </div>
+              )}
               <div>
-                <h1 className="text-2xl font-bold">{businessName}</h1>
-                <p className="text-gray-300">Professional Barber Services</p>
+                <h1 className="text-2xl font-bold text-black">{businessName}</h1>
+                <p className="text-sm text-gray-600">Professional Barber Services</p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Star className="w-5 h-5 text-yellow-400 fill-current" />
-              <span className="font-semibold">4.9 (127 reviews)</span>
+
+            {/* Customer Sign In */}
+            <div className="flex items-center space-x-4">
+              {!isCustomerLoggedIn ? (
+                <button
+                  onClick={() => setShowCustomerAuth(true)}
+                  className="px-4 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-colors font-medium"
+                >
+                  Customer Sign In
+                </button>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  <span className="text-sm text-gray-600">Welcome, {customerAccount?.email}</span>
+                  <button
+                    onClick={() => {
+                      setIsCustomerLoggedIn(false);
+                      setCustomerAccount(null);
+                      setCustomerBookings([]);
+                      // Clear customer token cookie
+                      document.cookie = 'customer-token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    }}
+                    className="px-3 py-1 text-sm border border-gray-300 text-gray-600 rounded hover:bg-gray-50 transition-colors"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
