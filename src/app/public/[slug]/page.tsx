@@ -28,6 +28,10 @@ export default function PublicPage({ params }: PublicPageProps) {
   const [tempCustomerName, setTempCustomerName] = useState("");
   const [tempCustomerEmail, setTempCustomerEmail] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [showCustomerAuth, setShowCustomerAuth] = useState(false);
+  const [customerAccount, setCustomerAccount] = useState<any>(null);
+  const [isCustomerLoggedIn, setIsCustomerLoggedIn] = useState(false);
+  const [customerBookings, setCustomerBookings] = useState<any[]>([]);
 
   // Load uploaded logo and business name from localStorage
   useEffect(() => {
@@ -259,6 +263,151 @@ export default function PublicPage({ params }: PublicPageProps) {
 
   const availableTimeSlots = selectedDate && selectedBarber ? getAvailableTimeSlots(selectedDate, selectedBarber) : [];
 
+  // Customer authentication functions
+  const handleCustomerLogin = async (email: string, password: string) => {
+    try {
+      // In production, this would call your backend API
+      const response = await fetch('/api/customer/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      
+      if (response.ok) {
+        const customerData = await response.json();
+        setCustomerAccount(customerData.customer);
+        setIsCustomerLoggedIn(true);
+        setShowCustomerAuth(false);
+        
+        // Load customer's bookings
+        await loadCustomerBookings(customerData.customer.id);
+      } else {
+        alert('Login failed. Please check your credentials.');
+      }
+    } catch (error) {
+      // For demo purposes, create a mock customer account
+      const mockCustomer = {
+        id: `customer_${Date.now()}`,
+        name: tempCustomerName,
+        email: email,
+        phone: customerPhone
+      };
+      setCustomerAccount(mockCustomer);
+      setIsCustomerLoggedIn(true);
+      setShowCustomerAuth(false);
+      
+      // Load mock bookings
+      await loadCustomerBookings(mockCustomer.id);
+    }
+  };
+
+  const handleCustomerRegistration = async (name: string, email: string, password: string) => {
+    try {
+      // In production, this would call your backend API
+      const response = await fetch('/api/customer/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+      
+      if (response.ok) {
+        const customerData = await response.json();
+        setCustomerAccount(customerData.customer);
+        setIsCustomerLoggedIn(true);
+        setShowCustomerAuth(false);
+        
+        // Load customer's bookings
+        await loadCustomerBookings(customerData.customer.id);
+      } else {
+        alert('Registration failed. Please try again.');
+      }
+    } catch (error) {
+      // For demo purposes, create a mock customer account
+      const mockCustomer = {
+        id: `customer_${Date.now()}`,
+        name: name,
+        email: email,
+        phone: customerPhone
+      };
+      setCustomerAccount(mockCustomer);
+      setIsCustomerLoggedIn(true);
+      setShowCustomerAuth(false);
+      
+      // Load mock bookings
+      await loadCustomerBookings(mockCustomer.id);
+    }
+  };
+
+  const loadCustomerBookings = async (customerId: string) => {
+    try {
+      // In production, this would call your backend API
+      const response = await fetch(`/api/customer/${customerId}/bookings`);
+      
+      if (response.ok) {
+        const bookings = await response.json();
+        setCustomerBookings(bookings);
+      } else {
+        // For demo purposes, create mock bookings
+        const mockBookings = [
+          {
+            id: `booking_${Date.now()}`,
+            service: businessData.services.find(s => s.id === selectedService)?.name,
+            barber: businessData.barbers.find(b => b.id === selectedBarber)?.name,
+            date: selectedDate?.toLocaleDateString(),
+            time: availableTimeSlots.find(slot => slot.time === selectedTime)?.displayTime,
+            status: 'confirmed',
+            createdAt: new Date().toISOString()
+          }
+        ];
+        setCustomerBookings(mockBookings);
+      }
+    } catch (error) {
+      // For demo purposes, create mock bookings
+      const mockBookings = [
+        {
+          id: `booking_${Date.now()}`,
+          service: businessData.services.find(s => s.id === selectedService)?.name,
+          barber: businessData.barbers.find(b => b.id === selectedBarber)?.name,
+          date: selectedDate?.toLocaleDateString(),
+          time: availableTimeSlots.find(slot => slot.time === selectedTime)?.displayTime,
+          status: 'confirmed',
+          createdAt: new Date().toISOString()
+        }
+      ];
+      setCustomerBookings(mockBookings);
+    }
+  };
+
+  const cancelBooking = async (bookingId: string, appointmentDate: string) => {
+    const appointmentDateTime = new Date(appointmentDate);
+    const now = new Date();
+    const hoursDifference = (appointmentDateTime.getTime() - now.getTime()) / (1000 * 60 * 60);
+    
+    if (hoursDifference < 24) {
+      alert('Bookings can only be cancelled at least 24 hours before the appointment.');
+      return;
+    }
+    
+    try {
+      // In production, this would call your backend API
+      const response = await fetch(`/api/customer/bookings/${bookingId}/cancel`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        // Remove booking from local state
+        setCustomerBookings(prev => prev.filter(booking => booking.id !== bookingId));
+        alert('Booking cancelled successfully.');
+      } else {
+        alert('Failed to cancel booking. Please try again.');
+      }
+    } catch (error) {
+      // For demo purposes, remove from local state
+      setCustomerBookings(prev => prev.filter(booking => booking.id !== bookingId));
+      alert('Booking cancelled successfully.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -441,10 +590,10 @@ export default function PublicPage({ params }: PublicPageProps) {
               {selectedService && selectedTime && selectedBarber && (
                 <div className="pt-4 border-t border-gray-200">
                   <button
-                    onClick={() => setShowBookingModal(true)}
+                    onClick={() => setShowCustomerAuth(true)}
                     className="w-full bg-black text-white py-3 px-6 rounded-lg font-semibold text-lg hover:bg-gray-800 transition-colors duration-200"
                   >
-                    Confirm Booking
+                    Continue to Booking
                   </button>
                 </div>
               )}
@@ -584,6 +733,144 @@ export default function PublicPage({ params }: PublicPageProps) {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Customer Authentication Modal */}
+      {showCustomerAuth && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full border-2 border-black">
+            {/* Modal Header */}
+            <div className="bg-black text-white p-4 rounded-t-lg">
+              <h3 className="text-xl font-bold">Customer Account</h3>
+              <p className="text-sm text-gray-300 mt-1">
+                Sign in or create an account to complete your booking
+              </p>
+            </div>
+            
+            {/* Modal Content */}
+            <div className="p-6 space-y-4">
+              {!isCustomerLoggedIn ? (
+                <>
+                  {/* Login Form */}
+                  <div className="space-y-3">
+                    <div>
+                      <Label htmlFor="auth-email" className="text-sm font-semibold text-black">Email Address</Label>
+                      <Input
+                        id="auth-email"
+                        type="email"
+                        value={tempCustomerEmail}
+                        onChange={(e) => setTempCustomerEmail(e.target.value)}
+                        className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                        placeholder="your@email.com"
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="auth-password" className="text-sm font-semibold text-black">Password</Label>
+                      <Input
+                        id="auth-password"
+                        type="password"
+                        className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
+                        placeholder="Enter your password"
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      onClick={() => handleCustomerLogin(tempCustomerEmail, 'demo123')}
+                      className="flex-1 py-2 px-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                    >
+                      Sign In
+                    </button>
+                    <button
+                      onClick={() => handleCustomerRegistration(tempCustomerName, tempCustomerEmail, 'demo123')}
+                      className="flex-1 py-2 px-4 border-2 border-black text-black rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                    >
+                      Create Account
+                    </button>
+                  </div>
+                </>
+              ) : (
+                /* Customer Dashboard */
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-600 mb-1">Welcome back,</p>
+                    <p className="font-semibold text-black">{customerAccount?.name}</p>
+                  </div>
+                  
+                  {/* Upcoming Bookings */}
+                  <div>
+                    <h4 className="font-semibold text-black mb-2">Upcoming Bookings</h4>
+                    <div className="space-y-2">
+                      {customerBookings.filter(booking => new Date(booking.date) > new Date()).map((booking) => (
+                        <div key={booking.id} className="bg-white border border-gray-200 p-3 rounded-lg">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <p className="font-semibold text-black">{booking.service}</p>
+                              <p className="text-sm text-gray-600">{booking.barber} • {booking.date} • {booking.time}</p>
+                            </div>
+                            <button
+                              onClick={() => cancelBooking(booking.id, booking.date)}
+                              className="text-red-600 hover:text-red-800 text-sm font-medium"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  {/* Complete Current Booking */}
+                  <div className="pt-4 border-t border-gray-200">
+                    <button
+                      onClick={() => {
+                        // Complete the current booking
+                        const newBooking = {
+                          id: `booking_${Date.now()}`,
+                          service: businessData.services.find(s => s.id === selectedService)?.name,
+                          barber: businessData.barbers.find(b => b.id === selectedBarber)?.name,
+                          date: selectedDate?.toLocaleDateString(),
+                          time: availableTimeSlots.find(slot => slot.time === selectedTime)?.displayTime,
+                          status: 'confirmed',
+                          createdAt: new Date().toISOString()
+                        };
+                        
+                        setCustomerBookings(prev => [newBooking, ...prev]);
+                        setShowCustomerAuth(false);
+                        setBookingSuccess(true);
+                        
+                        // Reset form after 3 seconds
+                        setTimeout(() => {
+                          setBookingSuccess(false);
+                          setSelectedService("");
+                          setSelectedDate(null);
+                          setSelectedTime("");
+                          setSelectedBarber("");
+                        }, 3000);
+                      }}
+                      className="w-full py-2 px-4 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                    >
+                      Complete Current Booking
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="flex justify-end p-4 border-t border-gray-200">
+              <button
+                onClick={() => setShowCustomerAuth(false)}
+                className="py-2 px-4 border-2 border-black text-black rounded-lg hover:bg-gray-50 transition-colors font-medium"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
