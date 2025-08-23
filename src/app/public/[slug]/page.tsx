@@ -23,6 +23,7 @@ export default function PublicPage({ params }: PublicPageProps) {
   const [isBooking, setIsBooking] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string>("");
   const [businessName, setBusinessName] = useState("Harrys Barbers");
+  const [selectedBarber, setSelectedBarber] = useState("");
 
   // Load uploaded logo and business name from localStorage
   useEffect(() => {
@@ -52,6 +53,11 @@ export default function PublicPage({ params }: PublicPageProps) {
       "Saturday": "9:00 AM - 5:00 PM",
       "Sunday": "Closed"
     },
+    barbers: [
+      { id: "barber1", name: "Mike Johnson", specialties: ["Haircuts", "Beard Trims"] },
+      { id: "barber2", name: "David Smith", specialties: ["Full Service", "Styling"] },
+      { id: "barber3", name: "Chris Wilson", specialties: ["Kids Cuts", "Haircuts"] }
+    ],
     services: [
       {
         id: "haircut",
@@ -174,34 +180,27 @@ export default function PublicPage({ params }: PublicPageProps) {
 
   const calendarData = generateCalendarData();
 
-  // Get next available time slots
-  const getNextAvailableSlots = () => {
-    const slots = [];
-    const now = new Date();
+  // Get available time slots for selected date
+  const getAvailableTimeSlots = (date: Date) => {
+    if (!date || date.getDay() === 0) return []; // Sunday closed
     
-    for (let i = 1; i <= 7; i++) {
-      const date = new Date(now);
-      date.setDate(now.getDate() + i);
-      
-      if (date.getDay() !== 0) { // Not Sunday
-        const dayData = calendarData.find(day => 
-          day.date.toDateString() === date.toDateString()
-        );
-        
-        if (dayData && dayData.capacity > 0) {
-          slots.push({
-            date: date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
-            capacity: dayData.capacity,
-            status: dayData.status
-          });
-        }
+    const slots = [];
+    const startHour = 9; // 9 AM
+    const endHour = 19; // 7 PM
+    
+    for (let hour = startHour; hour < endHour; hour++) {
+      // Add some random availability for realism
+      if (Math.random() > 0.3) { // 70% chance of availability
+        slots.push({
+          time: `${hour}:00`,
+          displayTime: `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? 'PM' : 'AM'}`,
+          available: true
+        });
       }
     }
     
-    return slots.slice(0, 3); // Return top 3 available slots
+    return slots;
   };
-
-  const nextAvailableSlots = getNextAvailableSlots();
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
@@ -210,7 +209,7 @@ export default function PublicPage({ params }: PublicPageProps) {
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedService || !selectedDate || !selectedTime || !customerName || !customerEmail) {
+    if (!selectedService || !selectedDate || !selectedTime || !customerName || !customerEmail || !selectedBarber) {
       alert("Please fill in all required fields");
       return;
     }
@@ -229,8 +228,11 @@ export default function PublicPage({ params }: PublicPageProps) {
       setCustomerName("");
       setCustomerEmail("");
       setCustomerPhone("");
+      setSelectedBarber("");
     }, 2000);
   };
+
+  const availableTimeSlots = selectedDate ? getAvailableTimeSlots(selectedDate) : [];
 
   return (
     <div className="min-h-screen bg-white">
@@ -279,15 +281,15 @@ export default function PublicPage({ params }: PublicPageProps) {
               <h3 className="text-2xl font-bold text-black mb-6">Our Services</h3>
               <div className="space-y-4">
                 {businessData.services.map((service) => (
-                  <div key={service.id} className="bg-black text-white p-4 rounded-lg">
+                  <div key={service.id} className="bg-white border-2 border-black text-black p-4 rounded-lg shadow-sm">
                     <div className="flex justify-between items-start mb-2">
                       <h4 className="font-bold text-lg">{service.name}</h4>
                       <span className="text-2xl font-bold">${service.price}</span>
                     </div>
-                    <p className="text-gray-300 mb-2">{service.description}</p>
+                    <p className="text-gray-600 mb-2">{service.description}</p>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-400">{service.duration}</span>
-                      <span className="bg-white text-black px-2 py-1 rounded text-xs font-semibold">
+                      <span className="text-sm text-gray-500">{service.duration}</span>
+                      <span className="bg-black text-white px-2 py-1 rounded text-xs font-semibold">
                         {service.name.includes('Hair') ? 'Hair' : 
                          service.name.includes('Beard') ? 'Beard' : 
                          service.name.includes('Shave') ? 'Shave' : 'Style'}
@@ -317,11 +319,8 @@ export default function PublicPage({ params }: PublicPageProps) {
                     title={`${day.date.toLocaleDateString()}: ${day.status} - ${day.capacity}% available`}
                     onClick={() => handleDateSelect(day.date)}
                   >
-                    <div className="text-xs font-bold mb-1">
-                      {day.isToday ? 'TODAY' : day.date.getDate()}
-                    </div>
-                    <div className="text-xs opacity-80">
-                      {day.capacity}%
+                    <div className="text-xs font-bold">
+                      {day.date.getDate()}
                     </div>
                   </div>
                 ))}
@@ -350,36 +349,31 @@ export default function PublicPage({ params }: PublicPageProps) {
                   <span className="text-xs text-black">Closed</span>
                 </div>
               </div>
-              
-              {/* Quick Stats */}
-              <div className="bg-gray-100 p-3 rounded-lg">
-                <p className="text-sm text-black">
-                  <strong>Next Available:</strong> {nextAvailableSlots[0]?.date} ({nextAvailableSlots[0]?.status})
-                </p>
-              </div>
             </div>
 
-            {/* Next Available Slots */}
-            <div className="bg-white border-2 border-black rounded-lg p-6 shadow-lg">
-              <h3 className="text-2xl font-bold text-black mb-4">Next Available Slots</h3>
-              <div className="space-y-3">
-                {nextAvailableSlots.map((slot, index) => (
-                  <div key={index} className="bg-black text-white p-3 rounded-lg">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold">{slot.date}</span>
-                      <span className={`px-2 py-1 rounded text-xs font-bold ${
-                        slot.capacity < 20 ? 'bg-red-600' :
-                        slot.capacity < 40 ? 'bg-red-500' :
-                        slot.capacity < 60 ? 'bg-orange-500' :
-                        slot.capacity < 80 ? 'bg-green-400' : 'bg-green-500'
-                      }`}>
-                        {slot.status}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+            {/* Available Time Slots - Shows when date is selected */}
+            {selectedDate && availableTimeSlots.length > 0 && (
+              <div className="bg-white border-2 border-black rounded-lg p-6 shadow-lg">
+                <h3 className="text-xl font-bold text-black mb-4">
+                  Available Times for {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                </h3>
+                <div className="grid grid-cols-3 gap-2">
+                  {availableTimeSlots.map((slot, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedTime(slot.time)}
+                      className={`p-3 rounded-lg border-2 transition-all duration-200 ${
+                        selectedTime === slot.time
+                          ? 'border-black bg-black text-white'
+                          : 'border-gray-300 bg-white text-black hover:border-black'
+                      }`}
+                    >
+                      {slot.displayTime}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Booking Form */}
             <div className="bg-white border-2 border-black rounded-lg p-6 shadow-lg">
@@ -423,30 +417,37 @@ export default function PublicPage({ params }: PublicPageProps) {
                 </div>
 
                 <div>
-                  <Label htmlFor="time" className="text-black font-semibold">Select Time</Label>
-                  <select
+                  <Label htmlFor="time" className="text-black font-semibold">Selected Time</Label>
+                  <Input
                     id="time"
-                    value={selectedTime}
-                    onChange={(e) => setSelectedTime(e.target.value)}
+                    type="text"
+                    value={selectedTime ? availableTimeSlots.find(slot => slot.time === selectedTime)?.displayTime || selectedTime : ''}
+                    readOnly
+                    className="w-full p-3 border-2 border-black rounded-lg bg-gray-50 text-black"
+                    placeholder="Select a time from the calendar above"
+                  />
+                  {!selectedTime && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Please select a date and time from the calendar above
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <Label htmlFor="barber" className="text-black font-semibold">Select Barber</Label>
+                  <select
+                    id="barber"
+                    value={selectedBarber}
+                    onChange={(e) => setSelectedBarber(e.target.value)}
                     className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
                     required
-                    disabled={!selectedDate}
                   >
-                    <option value="">Choose a time...</option>
-                    {selectedDate && (
-                      <>
-                        <option value="09:00">9:00 AM</option>
-                        <option value="10:00">10:00 AM</option>
-                        <option value="11:00">11:00 AM</option>
-                        <option value="12:00">12:00 PM</option>
-                        <option value="13:00">1:00 PM</option>
-                        <option value="14:00">2:00 PM</option>
-                        <option value="15:00">3:00 PM</option>
-                        <option value="16:00">4:00 PM</option>
-                        <option value="17:00">5:00 PM</option>
-                        <option value="18:00">6:00 PM</option>
-                      </>
-                    )}
+                    <option value="">Choose a barber...</option>
+                    {businessData.barbers.map((barber) => (
+                      <option key={barber.id} value={barber.id}>
+                        {barber.name} ({barber.specialties.join(', ')})
+                      </option>
+                    ))}
                   </select>
                 </div>
 
