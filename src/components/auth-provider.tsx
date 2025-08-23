@@ -63,17 +63,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      // Call logout API to clear server-side session
+      // Clear the auth token cookie
       await fetch('/api/auth/logout', {
         method: 'POST',
-        credentials: 'include',
+        credentials: 'include'
       });
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      // Clear local state regardless of API call success
+      
+      // Clear all localStorage data
+      localStorage.removeItem('nubarber_logo');
+      localStorage.removeItem('nubarber_logo_name');
+      localStorage.removeItem('nubarber_business_name');
+      localStorage.removeItem('current_user_email');
+      
+      // Clear user state
       setUser(null);
       setIsAuthenticated(false);
+      
+      // Redirect to sign in page
+      window.location.href = '/sign-in';
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force logout even if API call fails
+      setUser(null);
+      setIsAuthenticated(false);
+      localStorage.clear();
+      window.location.href = '/sign-in';
     }
   };
 

@@ -51,11 +51,23 @@ export default function PublicSitePage() {
     const existingLogo = localStorage.getItem('nubarber_logo');
     const existingBusinessName = localStorage.getItem('nubarber_business_name');
     
-    // Only load logo if it matches the current business name
+    // Only load logo if it matches the current business name AND user is authenticated
     if (existingLogo && existingBusinessName === businessName) {
-      setLogoPreview(existingLogo);
-      setHasExistingLogo(true);
-      console.log('✅ Loaded existing logo for:', businessName);
+      // Check if this is actually the current user's logo
+      const currentUserEmail = localStorage.getItem('current_user_email');
+      if (currentUserEmail) {
+        setLogoPreview(existingLogo);
+        setHasExistingLogo(true);
+        console.log('✅ Loaded existing logo for:', businessName);
+      } else {
+        // Clear logo if no current user
+        console.log('🧹 No current user, clearing logo data');
+        localStorage.removeItem('nubarber_logo');
+        localStorage.removeItem('nubarber_logo_name');
+        localStorage.removeItem('nubarber_business_name');
+        setLogoPreview("");
+        setHasExistingLogo(false);
+      }
     } else {
       // Clear any mismatched logo data
       if (existingLogo && existingBusinessName !== businessName) {
