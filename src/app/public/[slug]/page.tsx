@@ -58,9 +58,9 @@ export default function PublicPage({ params }: PublicPageProps) {
       "Sunday": "Closed"
     },
     barbers: [
-      { id: "barber1", name: "Mike Johnson", specialties: ["Haircuts", "Beard Trims"] },
-      { id: "barber2", name: "David Smith", specialties: ["Full Service", "Styling"] },
-      { id: "barber3", name: "Chris Wilson", specialties: ["Kids Cuts", "Haircuts"] }
+      { id: "barber1", name: "Mike Johnson" },
+      { id: "barber2", name: "David Smith" },
+      { id: "barber3", name: "Chris Wilson" }
     ],
     services: [
       {
@@ -355,7 +355,6 @@ export default function PublicPage({ params }: PublicPageProps) {
                       }`}
                     >
                       <div className="text-sm font-semibold">{barber.name}</div>
-                      <div className="text-xs opacity-80">{barber.specialties.join(', ')}</div>
                     </button>
                   ))}
                 </div>
