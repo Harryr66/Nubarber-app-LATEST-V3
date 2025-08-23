@@ -99,7 +99,7 @@ export default function PublicPage({ params }: PublicPageProps) {
     ]
   };
 
-  // Generate calendar data for the next 30 days with realistic barber availability
+  // Generate calendar data for the next 30 days with stable, professional availability
   const generateCalendarData = () => {
     const today = new Date();
     const calendarData = [];
@@ -111,35 +111,23 @@ export default function PublicPage({ params }: PublicPageProps) {
       // Get day of week (0 = Sunday, 6 = Saturday)
       const dayOfWeek = date.getDay();
       
-      // Base availability patterns for barbershops
+      // Professional business hours and availability patterns
       let baseCapacity = 0;
       let isClosed = false;
       
-      if (dayOfWeek === 0) { // Sunday
+      if (dayOfWeek === 0) { // Sunday - Closed
         baseCapacity = 0;
         isClosed = true;
-      } else if (dayOfWeek === 6) { // Saturday
-        baseCapacity = 45;
-      } else if (dayOfWeek === 5) { // Friday
-        baseCapacity = 75;
-      } else { // Weekdays
+      } else if (dayOfWeek === 6) { // Saturday - Limited hours
+        baseCapacity = 50;
+      } else if (dayOfWeek === 5) { // Friday - Busy day
+        baseCapacity = 70;
+      } else { // Weekdays - Full availability
         baseCapacity = 85;
       }
       
-      // Add some variation based on day of month
-      const dayOfMonth = date.getDate();
-      let timeVariation = 0;
-      if (dayOfMonth <= 5) { // Beginning of month
-        timeVariation = 15;
-      } else if (dayOfMonth <= 20) { // Middle of month
-        timeVariation = 0;
-      } else { // End of month
-        timeVariation = -10;
-      }
-      
-      // Add random variation for realism
-      const randomVariation = (Math.random() - 0.5) * 20;
-      let capacity = Math.max(0, Math.min(100, baseCapacity + timeVariation + randomVariation));
+      // Consistent availability based on business patterns (no random variation)
+      let capacity = baseCapacity;
       
       if (isClosed) {
         capacity = 0;
@@ -154,19 +142,19 @@ export default function PublicPage({ params }: PublicPageProps) {
         status = 'Closed';
       } else if (capacity < 20) {
         colorClass = 'bg-red-600 text-white shadow-lg';
-        status = 'Very Limited';
+        status = 'Fully Booked';
       } else if (capacity < 40) {
         colorClass = 'bg-red-500 text-white shadow-md';
-        status = 'Limited';
+        status = 'Limited Availability';
       } else if (capacity < 60) {
         colorClass = 'bg-orange-500 text-white shadow-md';
-        status = 'Moderate';
+        status = 'Moderate Availability';
       } else if (capacity < 80) {
         colorClass = 'bg-green-400 text-black shadow-sm';
-        status = 'Good';
+        status = 'Good Availability';
       } else {
         colorClass = 'bg-green-500 text-white shadow-sm';
-        status = 'Wide Open';
+        status = 'Excellent Availability';
       }
       
       calendarData.push({
@@ -392,7 +380,7 @@ export default function PublicPage({ params }: PublicPageProps) {
                   <div className="grid grid-cols-5 gap-2 mb-4">
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 bg-green-500 rounded"></div>
-                      <span className="text-xs text-black">Wide Open</span>
+                      <span className="text-xs text-black">Excellent</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 bg-green-400 rounded"></div>
