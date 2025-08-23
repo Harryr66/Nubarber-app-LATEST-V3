@@ -313,21 +313,28 @@ export default function PublicPage({ params }: PublicPageProps) {
               <h3 className="text-2xl font-bold text-black mb-6">Our Services</h3>
               <div className="space-y-4">
                 {businessData.services.map((service) => (
-                  <div key={service.id} className="bg-white border-2 border-black text-black p-4 rounded-lg shadow-sm">
+                  <button
+                    key={service.id}
+                    onClick={() => setSelectedService(service.id)}
+                    className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
+                      selectedService === service.id
+                        ? 'border-black bg-black text-white'
+                        : 'border-black bg-white text-black hover:bg-gray-50'
+                    }`}
+                  >
                     <div className="flex justify-between items-start mb-2">
                       <h4 className="font-bold text-lg">{service.name}</h4>
                       <span className="text-2xl font-bold">${service.price}</span>
                     </div>
-                    <p className="text-gray-600 mb-2">{service.description}</p>
+                    <p className={`mb-2 ${selectedService === service.id ? 'text-gray-300' : 'text-gray-600'}`}>
+                      {service.description}
+                    </p>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-500">{service.duration}</span>
-                      <span className="bg-black text-white px-2 py-1 rounded text-xs font-semibold">
-                        {service.name.includes('Hair') ? 'Hair' : 
-                         service.name.includes('Beard') ? 'Beard' : 
-                         service.name.includes('Shave') ? 'Shave' : 'Style'}
+                      <span className={`text-sm ${selectedService === service.id ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {service.duration}
                       </span>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -432,21 +439,13 @@ export default function PublicPage({ params }: PublicPageProps) {
               {/* Service Selection */}
               {selectedTime && (
                 <div className="mb-6">
-                  <Label className="text-sm font-semibold text-black mb-3 block">4. Select Service</Label>
-                  <select
-                    id="service"
-                    value={selectedService}
-                    onChange={(e) => setSelectedService(e.target.value)}
-                    className="w-full p-3 border-2 border-black rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black"
-                    required
-                  >
-                    <option value="">Choose a service...</option>
-                    {businessData.services.map((service) => (
-                      <option key={service.id} value={service.id}>
-                        {service.name} - ${service.price}
-                      </option>
-                    ))}
-                  </select>
+                  <Label className="text-sm font-semibold text-black mb-3 block">4. Selected Service</Label>
+                  <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <p className="text-sm text-gray-600 mb-1">Service:</p>
+                    <p className="font-semibold text-black">
+                      {businessData.services.find(s => s.id === selectedService)?.name} - ${businessData.services.find(s => s.id === selectedService)?.price}
+                    </p>
+                  </div>
                 </div>
               )}
               
