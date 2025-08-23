@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { DollarSign, CalendarDays, Users, Scissors, CalendarOff } from "lucide-react";
+import { DollarSign, CalendarDays, Users, Scissors, CalendarOff, Globe, Copy, ExternalLink } from "lucide-react";
 import BookingsChart from "./bookings-chart";
 import { StatsSkeleton, CardSkeleton } from "@/components/ui/loading-skeleton";
 
@@ -108,6 +108,74 @@ export default function Dashboard() {
               </Card>
             ))}
           </div>
+
+          {/* Custom Website Card */}
+          <Card className="border-2 border-blue-200 bg-blue-50">
+            <CardHeader className="pb-3 md:pb-6">
+              <CardTitle className="text-lg md:text-xl flex items-center gap-2">
+                <Globe className="h-5 w-5 text-blue-600" />
+                Your Custom Website
+              </CardTitle>
+              <CardDescription className="text-sm md:text-base">
+                Share this link with your customers for online booking
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-white border border-blue-200 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-700 mb-1">Your Website URL:</p>
+                    <div className="flex items-center space-x-2">
+                      <code className="bg-gray-100 px-3 py-2 rounded text-sm font-mono text-blue-600 break-all">
+                        {typeof window !== 'undefined' ? `${window.location.origin}/public/${user?.shopName?.toLowerCase().replace(/\s+/g, '')}` : 'Loading...'}
+                      </code>
+                      <button
+                        onClick={() => {
+                          const url = `${window.location.origin}/public/${user?.shopName?.toLowerCase().replace(/\s+/g, '')}`;
+                          navigator.clipboard.writeText(url);
+                          // You could add a toast notification here
+                        }}
+                        className="flex-shrink-0 p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                        title="Copy to clipboard"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a
+                  href={`/public/${user?.shopName?.toLowerCase().replace(/\s+/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  Preview Your Website
+                </a>
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}/public/${user?.shopName?.toLowerCase().replace(/\s+/g, '')}`;
+                    navigator.clipboard.writeText(url);
+                    alert('Website URL copied to clipboard!');
+                  }}
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+                >
+                  <Copy className="h-4 w-4" />
+                  Copy URL
+                </button>
+              </div>
+              
+              <div className="bg-blue-100 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800">
+                  <strong>💡 Tip:</strong> Share this link on social media, business cards, and with your customers. 
+                  They can book appointments directly from your custom website!
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
           <Card>
             <CardHeader className="pb-3 md:pb-6">

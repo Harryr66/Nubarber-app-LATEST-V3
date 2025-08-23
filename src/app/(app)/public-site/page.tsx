@@ -250,32 +250,70 @@ export default function PublicSitePage() {
                             )}
                         </p>
                     </div>
-                     <div className="space-y-3 md:space-y-4">
-                        <Label className="text-sm md:text-base">Your Custom URL</Label>
-                        <div className="space-y-3">
-                          {/* White Label URL (Future) */}
-                          <div className="p-3 md:p-4 rounded-md bg-blue-50 border border-blue-200">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                              <span className="text-base md:text-lg font-mono font-semibold text-blue-900 break-all">{whiteLabelUrl}</span>
-                              <span className="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded-full w-fit">Future</span>
+
+                    {/* Custom Website Section */}
+                    <div className="space-y-3 md:space-y-4">
+                        <Label className="text-sm md:text-base font-semibold">🌐 Your Custom Website</Label>
+                        <div className="p-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200">
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-lg font-bold text-blue-900">Ready to Share!</h4>
+                                    <span className="text-xs bg-green-500 text-white px-2 py-1 rounded-full font-semibold">LIVE NOW</span>
+                                </div>
+                                
+                                <div className="bg-white border border-blue-200 rounded-lg p-3">
+                                    <p className="text-sm font-medium text-gray-700 mb-2">Your Website URL:</p>
+                                    <div className="flex items-center space-x-2">
+                                        <code className="bg-gray-100 px-3 py-2 rounded text-sm font-mono text-blue-600 break-all flex-1">
+                                            {typeof window !== 'undefined' ? `${window.location.origin}/public/${businessName.toLowerCase().replace(/\s+/g, '')}` : 'Loading...'}
+                                        </code>
+                                        <button
+                                            onClick={() => {
+                                                const url = `${window.location.origin}/public/${businessName.toLowerCase().replace(/\s+/g, '')}`;
+                                                navigator.clipboard.writeText(url);
+                                                alert('Website URL copied to clipboard!');
+                                            }}
+                                            className="flex-shrink-0 p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                            title="Copy to clipboard"
+                                        >
+                                            <Copy className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <a
+                                        href={`/public/${businessName.toLowerCase().replace(/\s+/g, '')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                    >
+                                        <ImageIcon className="h-4 w-4" />
+                                        Preview Your Website
+                                    </a>
+                                    <button
+                                        onClick={() => {
+                                            const url = `${window.location.origin}/public/${businessName.toLowerCase().replace(/\s+/g, '')}`;
+                                            navigator.clipboard.writeText(url);
+                                            alert('Website URL copied to clipboard!');
+                                        }}
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+                                    >
+                                        <Copy className="h-4 w-4" />
+                                        Copy URL
+                                    </button>
+                                </div>
+                                
+                                <div className="bg-blue-100 border border-blue-200 rounded-lg p-3">
+                                    <p className="text-sm text-blue-800">
+                                        <strong>💡 Pro Tip:</strong> Share this link on social media, business cards, and with your customers. 
+                                        They can book appointments directly from your beautiful custom website!
+                                    </p>
+                                </div>
                             </div>
-                            <p className="text-xs md:text-sm text-blue-700 mt-1">Your white-label domain (requires DNS setup)</p>
-                          </div>
-                          
-                          {/* Working URL (Current) */}
-                          <div className="p-3 md:p-4 rounded-md bg-green-50 border border-green-200">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                              <span className="text-base md:text-lg font-mono font-semibold text-green-900 break-all">{workingUrl}</span>
-                              <span className="text-xs bg-green-200 text-green-800 px-2 py-1 rounded-full w-fit">Active</span>
-                            </div>
-                            <p className="text-xs md:text-sm text-green-700 mt-1">Your working booking page (ready to use now)</p>
-                          </div>
                         </div>
-                        <p className="text-xs md:text-sm text-muted-foreground leading-tight">
-                            <strong>White-label URL:</strong> Available once DNS is configured for .nubarber.com domain.<br/>
-                            <strong>Working URL:</strong> Use this link immediately to share with customers.
-                        </p>
                     </div>
+
                      <div className="space-y-3 md:space-y-4">
                         <Label htmlFor="headline" className="text-sm md:text-base">Headline</Label>
                         <Input 
