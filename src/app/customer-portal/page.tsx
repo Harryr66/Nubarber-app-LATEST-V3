@@ -20,7 +20,7 @@ import {
   Loader2
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 
 interface CustomerAccount {
   id: string;

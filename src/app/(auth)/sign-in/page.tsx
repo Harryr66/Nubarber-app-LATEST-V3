@@ -1,8 +1,8 @@
-import AuthForm from "./auth-form";
+import { AuthForm } from "./auth-form";
 
 export default function SignInPage() {
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-background p-4">
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <AuthForm />
     </div>
   );
