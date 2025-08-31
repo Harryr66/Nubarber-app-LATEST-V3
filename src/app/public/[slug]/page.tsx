@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar, Clock, MapPin, Phone, Mail, Users, CheckCircle, Star, ArrowRight, DollarSign } from "lucide-react";
+import { Calendar, Clock, MapPin, Phone, Mail, Users, CheckCircle, Star, ArrowRight, DollarSign, ExternalLink } from "lucide-react";
 import Image from "next/image";
 
 interface PublicPageProps {
@@ -29,6 +29,7 @@ export default function PublicPage({ params }: PublicPageProps) {
   const [customerBookings, setCustomerBookings] = useState<any[]>([]);
   const [depositSettings, setDepositSettings] = useState<any>(null);
   const [depositAmount, setDepositAmount] = useState<number | string>(0);
+  const [googleReviews, setGoogleReviews] = useState<any[]>([]);
 
   // Load uploaded logo and business name from localStorage
   useEffect(() => {
@@ -383,6 +384,13 @@ export default function PublicPage({ params }: PublicPageProps) {
     }
   }, [businessData.businessId]);
 
+  // Load Google reviews when business data is available
+  useEffect(() => {
+    if (businessData.businessId) {
+      loadGoogleReviews();
+    }
+  }, [businessData.businessId]);
+
   // Calculate deposit amount when service or deposit settings change
   useEffect(() => {
     if (selectedService && depositSettings?.enabled) {
@@ -406,6 +414,22 @@ export default function PublicPage({ params }: PublicPageProps) {
       }
     } catch (error) {
       console.error('Error loading deposit settings:', error);
+    }
+  };
+
+  const loadGoogleReviews = async () => {
+    try {
+      const response = await fetch(`/api/google-reviews?businessId=${businessData.businessId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setGoogleReviews(data.reviews);
+      } else {
+        console.error('Failed to load Google reviews:', response.status);
+        setGoogleReviews([]);
+      }
+    } catch (error) {
+      console.error('Error loading Google reviews:', error);
+      setGoogleReviews([]);
     }
   };
 
@@ -661,6 +685,86 @@ export default function PublicPage({ params }: PublicPageProps) {
           </div>
         </div>
       </main>
+
+      {/* Footer with Google Reviews */}
+      <footer className="bg-gray-900 text-white py-12 mt-16">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Business Information */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">{businessData.name}</h3>
+              <p className="text-gray-300 mb-2">{businessData.address}</p>
+              <p className="text-gray-300 mb-2">{businessData.phone}</p>
+              <p className="text-gray-300">{businessData.email}</p>
+            </div>
+
+            {/* Business Hours */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Business Hours</h3>
+              <div className="space-y-1 text-gray-300">
+                {Object.entries(businessData.hours).map(([day, hours]) => (
+                  <div key={day} className="flex justify-between">
+                    <span>{day}:</span>
+                    <span>{hours}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Google Reviews */}
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Customer Reviews</h3>
+              {googleReviews && googleReviews.length > 0 ? (
+                <div className="space-y-3">
+                  {googleReviews.slice(0, 3).map((review) => (
+                    <div key={review.id} className="bg-gray-800 rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-3 w-3 ${
+                                i < review.rating
+                                  ? 'fill-yellow-400 text-yellow-400'
+                                  : 'text-gray-600'
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <span className="text-xs text-gray-400">{review.rating}/5</span>
+                      </div>
+                      <p className="text-sm text-gray-300 line-clamp-2">{review.comment}</p>
+                      <p className="text-xs text-gray-500 mt-2">- {review.author}</p>
+                    </div>
+                  ))}
+                  <div className="text-center">
+                    <a
+                      href={`https://www.google.com/search?q=${encodeURIComponent(businessData.name + ' ' + businessData.address)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 text-sm inline-flex items-center gap-1"
+                    >
+                      View All Reviews
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-gray-400 text-sm">
+                  <p>No reviews available</p>
+                  <p className="mt-2">Be the first to leave a review!</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+            <p className="text-gray-400 text-sm">
+              © {new Date().getFullYear()} {businessData.name}. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
 
       {/* Customer Authentication Modal */}
       {showCustomerAuth && (

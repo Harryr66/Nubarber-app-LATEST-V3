@@ -12,6 +12,7 @@ import { StripeSettings } from "@/components/stripe-settings";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useDepositSettings } from "@/hooks/use-deposit-settings";
+import { GoogleBusinessIntegration } from "@/components/google-business-integration";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +77,7 @@ export default function SettingsPage() {
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="stripe">Stripe</TabsTrigger>
           <TabsTrigger value="deposits">Deposits</TabsTrigger>
+          <TabsTrigger value="google-business">Google My Business</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-6">
@@ -242,6 +244,10 @@ export default function SettingsPage() {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="google-business" className="space-y-6">
+          <GoogleBusinessIntegration businessId={businessId} />
         </TabsContent>
       </Tabs>
     </div>
