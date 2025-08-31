@@ -85,7 +85,7 @@ export default function PrivacyPolicyPage() {
               <li>Withdraw consent for marketing</li>
             </ul>
             <p className="text-gray-700 mb-4">
-              Email <a href="mailto:privacy@nubarber.com" className="text-blue-600 hover:text-blue-800">privacy@nubarber.com</a> to exercise your rights.
+              Email <a href="mailto:support@nubarber.com" className="text-blue-600 hover:text-blue-800">support@nubarber.com</a> to exercise your rights.
             </p>
 
             <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">6. Cookies and Tracking</h2>
@@ -112,7 +112,7 @@ export default function PrivacyPolicyPage() {
               <h3 className="text-lg font-medium text-gray-900 mb-2">Contact Us</h3>
               <p className="text-gray-700">
                 If you have any questions about this Privacy Policy, please contact us at{' '}
-                <a href="mailto:privacy@nubarber.com" className="text-blue-600 hover:text-blue-800">privacy@nubarber.com</a>
+                <a href="mailto:support@nubarber.com" className="text-blue-600 hover:text-blue-800">support@nubarber.com</a>
               </p>
             </div>
           </div>
