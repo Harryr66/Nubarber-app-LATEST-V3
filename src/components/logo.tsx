@@ -1,12 +1,17 @@
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export default function Logo() {
   return (
-    <Link href="/" className="flex items-center space-x-2">
-      <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-        <span className="text-white font-bold text-lg">N</span>
-      </div>
-      <span className="text-blue-900 font-bold text-xl">NuBarber</span>
+    <Link href="/" className="flex items-center gap-2" prefetch={false}>
+      <span
+        className={cn(
+          "font-headline text-2xl font-bold",
+          "text-foreground"
+        )}
+      >
+        NUBARBER
+      </span>
     </Link>
   );
 }
