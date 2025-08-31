@@ -8,7 +8,7 @@ export interface CustomDomain {
 }
 
 export const DOMAIN_CONFIG = {
-  // Main domain for all barbershops
+  // Main domain that YOU already own - no customer purchases needed
   mainDomain: 'nubarber.com',
   // Reserved subdomains that can't be used by customers
   reservedSubdomains: ['www', 'api', 'admin', 'app', 'dashboard', 'auth', 'login', 'signup'],
@@ -21,7 +21,7 @@ export const DOMAIN_CONFIG = {
 export class DomainService {
   /**
    * Generate a business slug from business name
-   * Converts "Beni's Barbers" to "benisbarbers"
+   * Converts "Harry's Barbers" to "harrysbarbers"
    */
   static generateBusinessSlug(businessName: string): string {
     return businessName
@@ -33,7 +33,8 @@ export class DomainService {
 
   /**
    * Generate the default subdomain URL for any barbershop
-   * Example: "benisbarbers" becomes "benisbarbers.nubarber.com"
+   * Example: "harrysbarbers" becomes "harrysbarbers.nubarber.com"
+   * NOTE: You already own nubarber.com, customers get subdomains automatically
    */
   static getDefaultSubdomainUrl(businessSlug: string): string {
     return `https://${businessSlug}.${DOMAIN_CONFIG.mainDomain}`;
@@ -77,6 +78,7 @@ export class DomainService {
 
   /**
    * Get all available domains for a business
+   * NOTE: Customers do NOT need to purchase domains - they get subdomains automatically
    */
   static getAvailableDomains(businessName: string): {
     primary: string;

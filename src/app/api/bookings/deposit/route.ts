@@ -2,14 +2,31 @@ import { NextRequest, NextResponse } from 'next/server';
 import { DepositPayment, DepositSettings } from '@/lib/types';
 import { db } from '@/firebase';
 import { doc, getDoc, setDoc, collection, addDoc, query, where, getDocs, updateDoc } from 'firebase/firestore';
-import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-});
+// Initialize Stripe only if the secret key is available
+let stripe: any = null;
+
+if (process.env.STRIPE_SECRET_KEY) {
+  try {
+    const Stripe = require('stripe');
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-07-30.basil',
+    });
+  } catch (error) {
+    console.error('Failed to initialize Stripe:', error);
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is available
+    if (!stripe) {
+      return NextResponse.json(
+        { error: 'Stripe is not configured' },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const { 
       bookingId, 

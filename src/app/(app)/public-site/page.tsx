@@ -260,79 +260,77 @@ export default function PublicSitePage() {
                           Your Professional Booking URL
                         </CardTitle>
                         <CardDescription>
-                          Every barbershop automatically gets a clean URL like benisbarbers.nubarber.com
+                          Every barbershop automatically gets a clean URL like harrysbarbers.nubarber.com
                         </CardDescription>
                       </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor="businessSlug">Business Slug</Label>
-                              <Input
-                                id="businessSlug"
-                                value={businessName ? DomainService.generateBusinessSlug(businessName) : ''}
-                                readOnly
-                                className="bg-gray-50 font-mono"
-                              />
-                              <p className="text-sm text-gray-500 mt-1">
-                                Automatically generated from your business name
-                              </p>
-                            </div>
-                            <div>
-                              <Label htmlFor="customDomain">Your Professional URL</Label>
-                              <Input
-                                id="customDomain"
-                                value={businessName ? DomainService.getDefaultSubdomainUrl(DomainService.generateBusinessSlug(businessName)) : ''}
-                                readOnly
-                                className="bg-gray-50 font-mono text-blue-600"
-                              />
-                              <p className="text-sm text-gray-500 mt-1">
-                                This URL will work automatically for your customers
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-green-900 mb-2">✅ Automatic Setup - No Configuration Needed!</h4>
-                            <p className="text-sm text-green-800">
-                              When you deploy your app with a custom domain, <strong>every barbershop automatically gets their own subdomain</strong>. 
-                              Just purchase <code className="bg-green-100 px-1 rounded">nubarber.com</code> and configure DNS once.
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="businessSlug">Business Slug</Label>
+                            <Input
+                              id="businessSlug"
+                              value={businessName ? DomainService.generateBusinessSlug(businessName) : ''}
+                              readOnly
+                              className="bg-gray-50 font-mono"
+                            />
+                            <p className="text-sm text-gray-500 mt-1">
+                              Automatically generated from your business name
                             </p>
                           </div>
-
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <h4 className="font-semibold text-blue-900 mb-2">How It Works:</h4>
-                            <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                              <li><strong>Purchase domain:</strong> nubarber.com (one-time setup)</li>
-                              <li><strong>Configure DNS:</strong> Point to Vercel (one-time setup)</li>
-                              <li><strong>Automatic subdomains:</strong> Every new barbershop gets their URL instantly</li>
-                              <li><strong>Examples:</strong> benisbarbers.nubarber.com, johnsbarber.nubarber.com</li>
-                            </ol>
+                          <div>
+                            <Label htmlFor="customDomain">Your Professional URL</Label>
+                            <Input
+                              id="customDomain"
+                              value={businessName ? DomainService.getDefaultSubdomainUrl(DomainService.generateBusinessSlug(businessName)) : ''}
+                              readOnly
+                              className="bg-gray-50 font-mono text-blue-600"
+                            />
+                            <p className="text-sm text-gray-500 mt-1">
+                              This URL will work automatically for your customers
+                            </p>
                           </div>
+                        </div>
+                        
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">✅ Automatic Setup - No Customer Configuration Needed!</h4>
+                          <p className="text-sm text-green-800">
+                            Since you already own <code className="bg-green-100 px-1 rounded">nubarber.com</code>, <strong>every new barbershop automatically gets their own subdomain</strong> when they sign up. 
+                            No domain purchases needed by your customers!
+                          </p>
+                        </div>
 
-                          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                              <p className="font-medium">Current URL (temporary):</p>
-                              <p className="text-sm text-gray-600 break-all">
-                                {typeof window !== 'undefined' ? window.location.origin : ''}/public/{businessName ? DomainService.generateBusinessSlug(businessName) : 'your-business'}
-                              </p>
-                            </div>
-                            <Button variant="outline" size="sm">
-                              Copy
-                            </Button>
-                          </div>
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">How It Works:</h4>
+                          <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                            <li><strong>You own:</strong> nubarber.com (already done ✅)</li>
+                            <li><strong>Configure DNS:</strong> Point to Vercel (one-time setup)</li>
+                            <li><strong>Automatic subdomains:</strong> Every new barbershop gets their URL instantly</li>
+                            <li><strong>Examples:</strong> harrysbarbers.nubarber.com, johnsbarber.nubarber.com</li>
+                          </ol>
+                        </div>
 
-                          <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
-                            <div>
-                              <p className="font-medium">Future Professional URL:</p>
-                              <p className="text-sm text-blue-600 break-all font-mono">
-                                {businessName ? DomainService.getDefaultSubdomainUrl(DomainService.generateBusinessSlug(businessName)) : 'https://yourbusiness.nubarber.com'}
-                              </p>
-                            </div>
-                            <Button variant="outline" size="sm">
-                              Copy
-                            </Button>
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Current URL (temporary):</p>
+                            <p className="text-sm text-gray-600 break-all">
+                              {typeof window !== 'undefined' ? window.location.origin : ''}/public/{businessName ? DomainService.generateBusinessSlug(businessName) : 'your-business'}
+                            </p>
                           </div>
+                          <Button variant="outline" size="sm">
+                            Copy
+                          </Button>
+                        </div>
+
+                        <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                          <div>
+                            <p className="font-medium">Future Professional URL:</p>
+                            <p className="text-sm text-blue-600 break-all font-mono">
+                              {businessName ? DomainService.getDefaultSubdomainUrl(DomainService.generateBusinessSlug(businessName)) : 'https://yourbusiness.nubarber.com'}
+                            </p>
+                          </div>
+                          <Button variant="outline" size="sm">
+                            Copy
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
