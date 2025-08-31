@@ -90,7 +90,7 @@ export default function LandingPage() {
         <section id="features" className="py-12 md:py-24 lg:py-32">
           <div className="container">
             <div className="mx-auto mb-12 max-w-3xl text-center">
-              <h2 className="text-4xl font-bold sm:text-5xl font-headline">Everything You Need to Succeed</h2>
+              <h2 className="text-4xl font-bold sm:text-5xl font-headline text-gray-900">Everything You Need to Succeed</h2>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
               {features.map((feature) => (
@@ -101,7 +101,7 @@ export default function LandingPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <CardTitle className="font-sans text-xl font-bold">{feature.title}</CardTitle>
+                    <CardTitle className="font-sans text-xl font-bold text-gray-900">{feature.title}</CardTitle>
                     <p className="text-muted-foreground font-sans">
                       {feature.description}
                     </p>
@@ -115,12 +115,12 @@ export default function LandingPage() {
         <section id="pricing" className="py-12 md:py-24 lg:py-32">
             <div className="container">
                 <div className="mx-auto mb-12 max-w-3xl text-center">
-                    <h2 className="font-headline text-4xl font-bold sm:text-5xl">Simple, Transparent Pricing</h2>
+                    <h2 className="font-headline text-4xl font-bold sm:text-5xl text-gray-900">Simple, Transparent Pricing</h2>
                 </div>
                 <div className="grid gap-8 md:grid-cols-2 max-w-4xl mx-auto">
                     <Card className="shadow-lg border-primary flex flex-col">
                         <CardHeader className="text-left">
-                            <CardTitle className="font-headline text-2xl font-bold">Primary Plan</CardTitle>
+                            <CardTitle className="font-headline text-2xl font-bold text-gray-900">Primary Plan</CardTitle>
                             <p className="font-sans text-4xl font-bold">$30<span className="text-lg font-normal text-muted-foreground">/month</span></p>
                         </CardHeader>
                         <CardContent className="flex-grow">
@@ -139,12 +139,12 @@ export default function LandingPage() {
                     </Card>
                     <Card className="shadow-lg flex flex-col">
                         <CardHeader className="text-left">
-                            <CardTitle className="font-headline text-2xl font-bold">Add-ons</CardTitle>
+                            <CardTitle className="font-headline text-2xl font-bold text-gray-900">Add-ons</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-grow">
                             <Card>
                                 <CardContent className="p-4">
-                                    <h4 className="font-semibold font-sans">Additional Staff</h4>
+                                    <h4 className="font-semibold font-sans text-gray-900">Additional Staff</h4>
                                     <p className="font-bold text-lg font-sans">$10<span className="text-sm font-normal text-muted-foreground">/month per member</span></p>
                                     <p className="text-sm text-muted-foreground mt-2 font-sans">Scale your team as your business grows. Add more staff members to your plan at any time.</p>
                                 </CardContent>
