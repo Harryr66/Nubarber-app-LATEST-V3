@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar, Clock, MapPin, Phone, Mail, Users, CheckCircle, Star, ArrowRight } from "lucide-react";
+import { Calendar, Clock, MapPin, Phone, Mail, Users, CheckCircle, Star, ArrowRight, DollarSign } from "lucide-react";
 import Image from "next/image";
 
 interface PublicPageProps {
@@ -27,6 +27,8 @@ export default function PublicPage({ params }: PublicPageProps) {
   const [customerAccount, setCustomerAccount] = useState<any>(null);
   const [isCustomerLoggedIn, setIsCustomerLoggedIn] = useState(false);
   const [customerBookings, setCustomerBookings] = useState<any[]>([]);
+  const [depositSettings, setDepositSettings] = useState<any>(null);
+  const [depositAmount, setDepositAmount] = useState<number | string>(0);
 
   // Load uploaded logo and business name from localStorage
   useEffect(() => {
@@ -44,57 +46,34 @@ export default function PublicPage({ params }: PublicPageProps) {
 
   // Mock business data - in production this would come from your database
   const businessData = {
-    name: businessName,
+    businessId: params.slug, // Use slug as businessId for now
+    name: "Beni's Barbers",
     slug: params.slug,
-    logo: logoUrl,
-    description: "Professional barber services with attention to detail and style",
-    address: "123 Main Street, Anytown, USA",
-    phone: "+1 (555) 123-4567",
-    email: `info@${params.slug}.com`,
+    logo: logoUrl || "/placeholder-logo.png",
+    description: "Professional barbering services in a relaxed atmosphere",
+    address: "123 Main Street, London, UK",
+    phone: "+44 20 1234 5678",
+    email: "info@benisbarbers.com",
     hours: {
-      "Monday - Friday": "9:00 AM - 7:00 PM",
-      "Saturday": "9:00 AM - 5:00 PM",
+      "Monday - Friday": "9:00 AM - 6:00 PM",
+      "Saturday": "9:00 AM - 4:00 PM",
       "Sunday": "Closed"
     },
     barbers: [
-      { id: "barber1", name: "Mike Johnson" },
-      { id: "barber2", name: "David Smith" },
-      { id: "barber3", name: "Chris Wilson" }
+      { id: "1", name: "Beni" },
+      { id: "2", name: "John" },
+      { id: "3", name: "Mike" }
     ],
     services: [
-      {
-        id: "haircut",
-        name: "Classic Haircut",
-        description: "Professional haircut with consultation and styling",
-        duration: "30 min",
-        price: 25
-      },
-      {
-        id: "beard-trim",
-        name: "Beard Trim & Style",
-        description: "Expert beard grooming and styling",
-        duration: "20 min",
-        price: 15
-      },
-      {
-        id: "full-service",
-        name: "Full Service",
-        description: "Haircut, beard trim, and complete styling",
-        duration: "45 min",
-        price: 35
-      },
-      {
-        id: "kids-cut",
-        name: "Kids Haircut",
-        description: "Gentle haircuts for children 12 and under",
-        duration: "25 min",
-        price: 20
-      }
+      { id: "1", name: "Haircut", price: 25, description: "Professional haircut and styling", duration: "30 min" },
+      { id: "2", name: "Beard Trim", price: 15, description: "Beard trimming and shaping", duration: "20 min" },
+      { id: "3", name: "Haircut & Beard", price: 35, description: "Combined haircut and beard service", duration: "45 min" },
+      { id: "4", name: "Kids Haircut", price: 18, description: "Haircut for children under 12", duration: "25 min" }
     ],
     reviews: [
-      { name: "Mike Johnson", rating: 5, comment: "Best barber in town! Always does an amazing job." },
-      { name: "David Smith", rating: 5, comment: "Professional service and great atmosphere. Highly recommend!" },
-      { name: "Chris Wilson", rating: 5, comment: "Clean cuts every time. Been coming here for years." }
+      { id: "1", name: "Sarah M.", rating: 5, comment: "Excellent service, very professional!" },
+      { id: "2", name: "James L.", rating: 5, comment: "Great haircut, will definitely return." },
+      { id: "3", name: "Mike R.", rating: 4, comment: "Good experience, friendly staff." }
     ]
   };
 
@@ -384,6 +363,52 @@ export default function PublicPage({ params }: PublicPageProps) {
     }
   };
 
+  const getRefundPolicyText = (policy: string) => {
+    switch (policy) {
+      case 'full':
+        return 'Full refund if cancelled 24 hours before appointment.';
+      case 'partial':
+        return 'Partial refund if cancelled 24 hours before appointment.';
+      case 'no_refund':
+        return 'No refund for cancellations.';
+      default:
+        return 'Refund policy not specified.';
+    }
+  };
+
+  // Load deposit settings when business data is available
+  useEffect(() => {
+    if (businessData.businessId) {
+      loadDepositSettings();
+    }
+  }, [businessData.businessId]);
+
+  // Calculate deposit amount when service or deposit settings change
+  useEffect(() => {
+    if (selectedService && depositSettings?.enabled) {
+      const service = businessData.services.find(s => s.id === selectedService);
+      if (service) {
+        if (depositSettings.type === 'percentage') {
+          setDepositAmount(((service.price * depositSettings.amount) / 100).toFixed(2));
+        } else {
+          setDepositAmount(depositSettings.amount.toFixed(2));
+        }
+      }
+    }
+  }, [selectedService, depositSettings, businessData.services]);
+
+  const loadDepositSettings = async () => {
+    try {
+      const response = await fetch(`/api/barber/deposit-settings?businessId=${businessData.businessId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setDepositSettings(data.settings);
+      }
+    } catch (error) {
+      console.error('Error loading deposit settings:', error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -572,14 +597,40 @@ export default function PublicPage({ params }: PublicPageProps) {
               )}
               
               {/* Service Selection */}
-              {selectedTime && (
-                <div className="mb-6">
-                  <Label className="text-sm font-semibold text-black mb-3 block">4. Selected Service</Label>
-                  <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
-                    <p className="text-sm text-gray-600 mb-1">Service:</p>
-                    <p className="font-semibold text-black">
-                      {businessData.services.find(s => s.id === selectedService)?.name} - ${businessData.services.find(s => s.id === selectedService)?.price}
-                    </p>
+              {selectedService && (
+                <div className="bg-white rounded-lg p-4 mb-6 border">
+                  <h3 className="text-lg font-semibold mb-2">Selected Service</h3>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{businessData.services.find(s => s.id === selectedService)?.name}</p>
+                      <p className="text-gray-600">{businessData.services.find(s => s.id === selectedService)?.description}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-gray-900">${businessData.services.find(s => s.id === selectedService)?.price}</p>
+                      {depositSettings?.enabled && (
+                        <p className="text-sm text-blue-600">
+                          Deposit: ${depositAmount} 
+                          {depositSettings.type === 'percentage' ? `(${depositSettings.amount}%)` : ''}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Deposit Information */}
+              {depositSettings?.enabled && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="h-5 w-5 text-blue-600" />
+                    <h3 className="font-semibold text-blue-900">Deposit Required</h3>
+                  </div>
+                  <p className="text-blue-800 text-sm mb-2">
+                    {depositSettings.customerMessage}
+                  </p>
+                  <div className="text-sm text-blue-700">
+                    <p><strong>Deposit Amount:</strong> ${depositAmount}</p>
+                    <p><strong>Refund Policy:</strong> {getRefundPolicyText(depositSettings.refundPolicy)}</p>
                   </div>
                 </div>
               )}
