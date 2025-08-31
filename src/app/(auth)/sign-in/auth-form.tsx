@@ -372,6 +372,48 @@ export function AuthForm() {
                   </Button>
                 </div>
               </div>
+
+              {/* Terms and Privacy Checkboxes */}
+              <div className="space-y-3">
+                <div className="flex items-start space-x-2">
+                  <input
+                    type="checkbox"
+                    id="terms-accept"
+                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    required
+                  />
+                  <label htmlFor="terms-accept" className="text-sm text-gray-700">
+                    I agree to the{' '}
+                    <a
+                      href="/terms-of-service"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Terms of Service
+                    </a>
+                  </label>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <input
+                    type="checkbox"
+                    id="privacy-accept"
+                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    required
+                  />
+                  <label htmlFor="privacy-accept" className="text-sm text-gray-700">
+                    I agree to the{' '}
+                    <a
+                      href="/privacy-policy"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 underline"
+                    >
+                      Privacy Policy
+                    </a>
+                  </label>
+                </div>
+              </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <>

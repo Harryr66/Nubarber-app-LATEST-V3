@@ -159,10 +159,24 @@ export default function LandingPage() {
         </section>
       </main>
 
-      <footer className="border-t">
-        <div className="container py-6 flex justify-between items-center text-sm text-muted-foreground">
-            <p>&copy; 2025 NuBarber. All rights reserved.</p>
-            <Link href="#" className="hover:underline">Privacy Policy</Link>
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="container mx-auto px-4 text-center">
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold mb-2">NuBarber</h3>
+            <p className="text-gray-300">Professional barbershop booking platform</p>
+          </div>
+          <div className="flex justify-center space-x-6 mb-6">
+            <a href="/privacy-policy" className="text-gray-400 hover:text-white transition-colors">
+              Privacy Policy
+            </a>
+            <a href="/terms-of-service" className="text-gray-400 hover:text-white transition-colors">
+              Terms of Service
+            </a>
+          </div>
+          <p className="text-gray-400 text-sm">
+            © {new Date().getFullYear()} NuBarber. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>

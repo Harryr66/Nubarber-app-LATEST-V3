@@ -759,9 +759,23 @@ export default function PublicPage({ params }: PublicPageProps) {
           </div>
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 text-sm mb-4">
               © {new Date().getFullYear()} {businessData.name}. All rights reserved.
             </p>
+            <div className="flex justify-center space-x-6 text-sm">
+              <a
+                href="/privacy-policy"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                Privacy Policy
+              </a>
+              <a
+                href="/terms-of-service"
+                className="text-gray-400 hover:text-white transition-colors"
+              >
+                Terms of Service
+              </a>
+            </div>
           </div>
         </div>
       </footer>

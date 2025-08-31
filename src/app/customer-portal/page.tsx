@@ -567,6 +567,25 @@ export default function CustomerPortalPage() {
           </CardContent>
         </Card>
       </div>
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="text-center text-sm text-gray-500">
+          <p className="mb-2">© {new Date().getFullYear()} NuBarber. All rights reserved.</p>
+          <div className="flex justify-center space-x-4">
+            <a
+              href="/privacy-policy"
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              Privacy Policy
+            </a>
+            <a
+              href="/terms-of-service"
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              Terms of Service
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 } 
