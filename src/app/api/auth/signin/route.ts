@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { db } from '@/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 
@@ -21,32 +21,66 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Authenticate with Firebase
-    const auth = getAuth();
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const firebaseUser = userCredential.user;
-
-    console.log('✅ Firebase authentication successful for:', firebaseUser.uid);
-
-    // Get user data from Firestore
-    const userRef = doc(db, 'users', firebaseUser.uid);
-    const userSnap = await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-      console.error('❌ User document not found in Firestore');
+    // Find user by email in Firestore
+    console.log('🔍 Searching for user with email:', email);
+    
+    // Get all users and find by email (temporary approach)
+    const usersRef = collection(db, 'users');
+    const usersSnapshot = await getDocs(usersRef);
+    
+    let userData: any = null;
+    let userId: string | null = null;
+    
+    usersSnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.email && data.email.toLowerCase() === email.toLowerCase()) {
+        userData = data;
+        userId = doc.id;
+        console.log('✅ Found user:', userId);
+      }
+    });
+    
+    if (!userData || !userId) {
+      console.log('❌ User not found with email:', email);
       return NextResponse.json(
-        { error: 'User data not found' },
-        { status: 404 }
+        { error: 'No account found with this email address' },
+        { status: 401 }
       );
     }
 
-    const userData = userSnap.data();
+    // Get password hash from passwords collection
+    const passwordRef = doc(db, 'passwords', userId);
+    const passwordSnap = await getDoc(passwordRef);
+    
+    if (!passwordSnap.exists()) {
+      console.log('❌ Password hash not found for user:', userId);
+      return NextResponse.json(
+        { error: 'Account setup incomplete' },
+        { status: 401 }
+      );
+    }
+    
+    const passwordData = passwordSnap.data();
+    const storedHash = passwordData.passwordHash;
+    
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, storedHash);
+    
+    if (!isPasswordValid) {
+      console.log('❌ Invalid password for user:', userId);
+      return NextResponse.json(
+        { error: 'Incorrect password' },
+        { status: 401 }
+      );
+    }
+    
+    console.log('✅ Password verified for user:', userId);
 
     // Create JWT token
     const token = jwt.sign(
       { 
-        userId: firebaseUser.uid, 
-        email: firebaseUser.email,
+        userId: userId, 
+        email: userData.email,
         shopName: userData.shopName,
         region: userData.region
       },
@@ -54,14 +88,14 @@ export async function POST(request: NextRequest) {
       { expiresIn: '24h' }
     );
 
-    console.log('✅ JWT token created for user:', firebaseUser.uid);
+    console.log('✅ JWT token created for user:', userId);
 
     // Set JWT token in HTTP-only cookie
     const response = NextResponse.json({
       message: 'Sign in successful',
       user: {
-        id: firebaseUser.uid,
-        email: firebaseUser.email,
+        id: userId,
+        email: userData.email,
         shopName: userData.shopName,
         locationType: userData.locationType,
         businessAddress: userData.businessAddress,
@@ -89,17 +123,7 @@ export async function POST(request: NextRequest) {
     let errorMessage = 'Sign in failed';
     
     if (error instanceof Error) {
-      if (error.message.includes('user-not-found')) {
-        errorMessage = 'No account found with this email address';
-      } else if (error.message.includes('wrong-password')) {
-        errorMessage = 'Incorrect password';
-      } else if (error.message.includes('invalid-email')) {
-        errorMessage = 'Invalid email address';
-      } else if (error.message.includes('too-many-requests')) {
-        errorMessage = 'Too many failed attempts. Please try again later';
-      } else {
-        errorMessage = `Sign in failed: ${error.message}`;
-      }
+      errorMessage = `Sign in failed: ${error.message}`;
     }
 
     return NextResponse.json(
