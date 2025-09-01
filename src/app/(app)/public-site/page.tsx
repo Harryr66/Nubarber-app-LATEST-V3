@@ -294,15 +294,7 @@ export default function PublicSitePage() {
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                           <h4 className="font-semibold text-green-900 mb-2">✅ SUBDOMAIN SYSTEM OPERATIONAL - Ready for Customers!</h4>
                           <p className="text-sm text-green-800">
-                            Your subdomain system is LIVE! Every barbershop automatically gets their professional URL when they sign up. 
-                            Your customers (barbers) don't need to buy domains or configure DNS - it's all automatic!
-                          </p>
-                        </div>
-
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                          <h4 className="font-semibold text-green-900 mb-2">✅ SUBDOMAIN SYSTEM OPERATIONAL - Ready for Customers!</h4>
-                          <p className="text-sm text-green-800">
-                            Your subdomain system is LIVE! Every barbershop automatically gets their professional URL when they sign up. 
+                            Since <strong>you own</strong> <code className="bg-green-100 px-1 rounded">nubarber.com</code>, <strong>every new barbershop automatically gets their own subdomain</strong> when they sign up. 
                             Your customers (barbers) don't need to buy domains or configure DNS - it's all automatic!
                           </p>
                         </div>
@@ -311,7 +303,7 @@ export default function PublicSitePage() {
                           <h4 className="font-semibold text-blue-900 mb-2">How It Works:</h4>
                           <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
                             <li><strong>Platform Owner (You):</strong> Own nubarber.com ✅</li>
-                            <li><strong>One-Time Setup (Platform Owner):</strong> Configure DNS for nubarber.com to point to Vercel (done once, not by individual barbers)</li>
+                            <li><strong>One-Time Setup:</strong> Configure DNS for nubarber.com to point to Vercel</li>
                             <li><strong>Automatic Subdomains:</strong> Every barbershop gets their URL instantly when they sign up</li>
                             <li><strong>No Customer Setup:</strong> Barbers don't need to configure anything - it's automatic!</li>
                             <li><strong>Examples:</strong> harrysbarbers.nubarber.com, johnsbarber.nubarber.com</li>
@@ -332,7 +324,7 @@ export default function PublicSitePage() {
 
                         <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
                           <div>
-                            <p className="font-medium">Your Professional URL (LIVE):</p>
+                            <p className="font-medium">Future Professional URL:</p>
                             <p className="text-sm text-blue-600 break-all font-mono">
                               {businessName ? DomainService.getDefaultSubdomainUrl(DomainService.generateBusinessSlug(businessName)) : 'https://yourbusiness.nubarber.com'}
                             </p>
@@ -356,19 +348,81 @@ export default function PublicSitePage() {
                                 
                                 <div className="bg-white border border-blue-200 rounded-lg p-3">
                                     <p className="text-sm font-medium text-gray-700 mb-2">Your Website URL:</p>
-                                    <p className="text-sm text-blue-600 break-all font-mono">
-                                        {businessName ? DomainService.getDefaultSubdomainUrl(DomainService.generateBusinessSlug(businessName)) : 'https://yourbusiness.nubarber.com'}
-                                    </p>
+                                    <div className="flex items-center space-x-2">
+                                        <code className="bg-gray-100 px-3 py-2 rounded text-sm font-mono text-blue-600 break-all flex-1">
+                                            {typeof window !== 'undefined' ? `${window.location.origin}/public/${businessName.toLowerCase().replace(/\s+/g, '')}` : 'Loading...'}
+                                        </code>
+                                        <button
+                                            onClick={() => {
+                                                const url = `${window.location.origin}/public/${businessName.toLowerCase().replace(/\s+/g, '')}`;
+                                                navigator.clipboard.writeText(url);
+                                                alert('Website URL copied to clipboard!');
+                                            }}
+                                            className="flex-shrink-0 p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
+                                            title="Copy to clipboard"
+                                        >
+                                            <Copy className="h-4 w-4" />
+                                        </button>
+                                    </div>
                                 </div>
                                 
-                                <p className="text-xs text-gray-600">
-                                    Share this URL with your customers for easy online booking!
-                                </p>
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <a
+                                        href={`/public/${businessName.toLowerCase().replace(/\s+/g, '')}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                    >
+                                        <ImageIcon className="h-4 w-4" />
+                                        Preview Your Website
+                                    </a>
+                                    <button
+                                        onClick={() => {
+                                            const url = `${window.location.origin}/public/${businessName.toLowerCase().replace(/\s+/g, '')}`;
+                                            navigator.clipboard.writeText(url);
+                                            alert('Website URL copied to clipboard!');
+                                        }}
+                                        className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-white border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+                                    >
+                                        <Copy className="h-4 w-4" />
+                                        Copy URL
+                                    </button>
+                                </div>
+                                
+                                <div className="bg-blue-100 border border-blue-200 rounded-lg p-3">
+                                    <p className="text-sm text-blue-800">
+                                        <strong>💡 Pro Tip:</strong> Share this link on social media, business cards, and with your customers. 
+                                        They can book appointments directly from your beautiful custom website!
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
+
+                     <div className="space-y-3 md:space-y-4">
+                        <Label htmlFor="headline" className="text-sm md:text-base">Headline</Label>
+                        <Input 
+                          id="headline" 
+                          value={headline}
+                          onChange={(e) => setHeadline(e.target.value)}
+                          placeholder="Enter your headline"
+                          className="h-10 md:h-11 text-base"
+                        />
+                    </div>
+                    <div className="space-y-3 md:space-y-4">
+                        <Label htmlFor="description" className="text-sm md:text-base">Description</Label>
+                        <Textarea 
+                          id="description" 
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          placeholder="Enter your description"
+                          className="min-h-[80px] md:min-h-[100px] text-base"
+                        />
+                    </div>
+                </CardContent>
+            </Card>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
