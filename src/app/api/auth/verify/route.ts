@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AuthService } from '@/lib/auth';
+import jwt from 'jsonwebtoken';
+import { db } from '@/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,32 +18,36 @@ export async function GET(request: NextRequest) {
     }
     
     try {
-      // Verify the token
-      const decoded = AuthService.verifyToken(token);
+      // Verify the JWT token
+      const decoded = jwt.verify(token, JWT_SECRET) as any;
       
-      // Get user details
-      const user = AuthService.getUserById(decoded.userId);
+      // Get user details from Firestore
+      const userRef = doc(db, 'users', decoded.userId);
+      const userSnap = await getDoc(userRef);
       
-      if (!user) {
+      if (!userSnap.exists()) {
         return NextResponse.json(
           { message: 'User not found' },
           { status: 404 }
         );
       }
       
+      const userData = userSnap.data();
+      
       return NextResponse.json({
         success: true,
         user: {
-          id: user.id,
-          email: user.email,
-          shopName: user.shopName,
-          role: user.role
+          id: decoded.userId,
+          email: userData.email,
+          shopName: userData.shopName,
+          role: 'admin' // Default role for barbershop owners
         }
       });
       
     } catch (tokenError: any) {
+      console.error('Token verification failed:', tokenError);
       return NextResponse.json(
-        { message: tokenError.message },
+        { message: 'Invalid or expired token' },
         { status: 401 }
       );
     }

@@ -53,11 +53,13 @@ export function AuthForm() {
         });
 
         if (response.ok) {
+          const data = await response.json();
           toast({
             title: "Account created successfully!",
             description: "Welcome to NuBarber!",
           });
           // Automatically sign in the user after account creation
+          // The auth cookie is set by the API, just redirect
           router.push("/dashboard");
         } else {
           const error = await response.json();

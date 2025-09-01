@@ -3,6 +3,9 @@ import { db } from '@/firebase';
 import { collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 
 export async function POST(request: NextRequest) {
   try {
@@ -94,7 +97,22 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Password hash stored successfully!');
 
-    return NextResponse.json({
+    // Create JWT token for automatic login
+    const token = jwt.sign(
+      { 
+        userId: firebaseUser.uid, 
+        email: firebaseUser.email,
+        shopName: userData.shopName,
+        region: userData.region
+      },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
+    console.log('✅ JWT token created for new user:', firebaseUser.uid);
+
+    // Create response with auth cookie
+    const response = NextResponse.json({
       message: 'Account created successfully in Firebase Auth & Firestore!',
       user: {
         id: firebaseUser.uid,
@@ -109,6 +127,16 @@ export async function POST(request: NextRequest) {
         createdAt: new Date().toISOString()
       }
     });
+
+    // Set the JWT token in an HTTP-only cookie
+    response.cookies.set('auth-token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 // 24 hours
+    });
+
+    return response;
 
   } catch (error) {
     console.error('❌ Firebase signup failed:', error);
