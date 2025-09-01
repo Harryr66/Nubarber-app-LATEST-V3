@@ -64,11 +64,7 @@ export default function Dashboard() {
         <h1 className="text-2xl md:text-3xl font-bold font-heading">
           {isLoading ? "Loading..." : "Overview"}
         </h1>
-        {!isLoading && isAuthenticated && (
-          <p className="text-sm md:text-base text-muted-foreground">
-            Welcome back, {user?.shopName}!
-          </p>
-        )}
+        {/* Removed welcome message to avoid empty greeting */}
       </div>
       
       {/* Content Area - Stable structure */}
@@ -125,11 +121,21 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <div className="overflow-x-auto">
-            <div className="min-w-[600px]">
-              <BookingsChart />
-            </div>
-          </div>
+          <Card>
+            <CardHeader className="pb-3 md:pb-6">
+              <CardTitle className="text-lg md:text-xl">Monthly Bookings Overview</CardTitle>
+              <CardDescription className="text-sm md:text-base">
+                Track your booking trends over the past 6 months
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <div className="min-w-[600px]">
+                  <BookingsChart />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
     </div>

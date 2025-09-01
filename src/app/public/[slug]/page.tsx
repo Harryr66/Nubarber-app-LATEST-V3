@@ -623,14 +623,14 @@ export default function PublicPage({ params }: PublicPageProps) {
               {/* Service Selection */}
               {selectedService && (
                 <div className="bg-white rounded-lg p-4 mb-6 border">
-                  <h3 className="text-lg font-semibold mb-2">Selected Service</h3>
+                  <h3 className="text-lg font-semibold mb-2 text-black">Selected Service</h3>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-medium">{businessData.services.find(s => s.id === selectedService)?.name}</p>
-                      <p className="text-gray-600">{businessData.services.find(s => s.id === selectedService)?.description}</p>
+                      <p className="font-medium text-black">{businessData.services.find(s => s.id === selectedService)?.name}</p>
+                      <p className="text-gray-700">{businessData.services.find(s => s.id === selectedService)?.description}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-900">${businessData.services.find(s => s.id === selectedService)?.price}</p>
+                      <p className="text-2xl font-bold text-black">${businessData.services.find(s => s.id === selectedService)?.price}</p>
                       {depositSettings?.enabled && (
                         <p className="text-sm text-blue-600">
                           Deposit: ${depositAmount} 
@@ -674,8 +674,8 @@ export default function PublicPage({ params }: PublicPageProps) {
               {/* No Availability Message */}
               {selectedDate && selectedBarber && availableTimeSlots.length === 0 && (
                 <div className="bg-gray-50 border border-gray-300 rounded-lg p-4">
-                  <h4 className="text-lg font-semibold text-gray-600 mb-2">No Available Times</h4>
-                  <p className="text-gray-500 text-sm">
+                  <h4 className="text-lg font-semibold text-black mb-2">No Available Times</h4>
+                  <p className="text-gray-800 text-sm">
                     {businessData.barbers.find(b => b.id === selectedBarber)?.name} is not available on {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}. 
                     Please select a different date or barber.
                   </p>
