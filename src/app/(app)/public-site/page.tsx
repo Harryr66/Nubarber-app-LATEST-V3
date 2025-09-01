@@ -312,7 +312,7 @@ export default function PublicSitePage() {
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                           <div>
-                            <p className="font-medium">Your Professional URL:</p>
+                            <p className="font-medium">Your Website URL:</p>
                             <p className="text-sm text-gray-600 break-all">
                               {typeof window !== 'undefined' ? window.location.origin : ''}/public/{businessName ? DomainService.generateBusinessSlug(businessName) : 'your-business'}
                             </p>
@@ -324,7 +324,7 @@ export default function PublicSitePage() {
 
                         <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
                           <div>
-                            <p className="font-medium">Your Professional URL:</p>
+                            <p className="font-medium">Your Website URL:</p>
                             <p className="text-sm text-blue-600 break-all font-mono">
                               {businessName ? DomainService.getDefaultSubdomainUrl(DomainService.generateBusinessSlug(businessName)) : 'https://yourbusiness.nubarber.com'}
                             </p>
