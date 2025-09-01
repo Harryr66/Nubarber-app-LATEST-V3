@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function AuthForm() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -21,6 +22,7 @@ export function AuthForm() {
   const [loading, setLoading] = useState(false);
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [legalAccepted, setLegalAccepted] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -30,8 +32,18 @@ export function AuthForm() {
 
     try {
       if (isSignUp) {
-        // Handle sign up
-        const response = await fetch("/api/auth/signup", {
+        // Ensure legal consents
+        if (!legalAccepted) {
+          toast({
+            title: "Consent required",
+            description: "Please accept the Terms of Service and Privacy Policy to continue.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Handle sign up (use Firebase-backed endpoint)
+        const response = await fetch("/api/auth/firebase-signup", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -40,6 +52,10 @@ export function AuthForm() {
             email,
             password,
             shopName,
+            // Provide required backend fields with sensible defaults
+            locationType: "physical",
+            businessAddress: "",
+            staffCount: 1,
             country,
           }),
         });
@@ -54,6 +70,7 @@ export function AuthForm() {
           setPassword("");
           setShopName("");
           setCountry("");
+          setLegalAccepted(false);
         } else {
           const error = await response.json();
           toast({
@@ -154,6 +171,7 @@ export function AuthForm() {
     setPassword("");
     setShopName("");
     setCountry("");
+    setLegalAccepted(false);
   };
 
   if (forgotPasswordMode) {
@@ -373,16 +391,15 @@ export function AuthForm() {
                 </div>
               </div>
 
-              {/* Terms and Privacy Checkboxes */}
+              {/* Terms and Privacy Checkbox */}
               <div className="space-y-3">
                 <div className="flex items-start space-x-2">
-                  <input
-                    type="checkbox"
-                    id="terms-accept"
-                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    required
+                  <Checkbox
+                    id="legal-accept"
+                    checked={legalAccepted}
+                    onCheckedChange={(v) => setLegalAccepted(Boolean(v))}
                   />
-                  <label htmlFor="terms-accept" className="text-sm text-gray-700">
+                  <label htmlFor="legal-accept" className="text-sm text-gray-700">
                     I agree to the{' '}
                     <a
                       href="/terms-of-service"
@@ -392,17 +409,7 @@ export function AuthForm() {
                     >
                       Terms of Service
                     </a>
-                  </label>
-                </div>
-                <div className="flex items-start space-x-2">
-                  <input
-                    type="checkbox"
-                    id="privacy-accept"
-                    className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    required
-                  />
-                  <label htmlFor="privacy-accept" className="text-sm text-gray-700">
-                    I agree to the{' '}
+                    {' '}and{' '}
                     <a
                       href="/privacy-policy"
                       target="_blank"
