@@ -79,7 +79,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   >
                     <Link href={item.href}>
                       <item.icon className="h-5 w-5" />
-                      <span>{item.label}</span>
+                      <span className="font-bold">{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -140,7 +140,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-bold transition-colors ${
                           pathname === item.href || (item.href === "/dashboard" && pathname === "/")
                             ? "bg-primary text-primary-foreground"
                             : "text-muted-foreground hover:text-foreground hover:bg-muted"
@@ -163,7 +163,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
+                      <p className="text-sm font-bold truncate">
                         {isLoading ? 'Loading...' : user?.shopName || 'Unknown'}
                       </p>
                     </div>
