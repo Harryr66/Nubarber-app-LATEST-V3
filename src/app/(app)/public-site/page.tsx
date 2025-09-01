@@ -286,16 +286,33 @@ export default function PublicSitePage() {
                               className="bg-gray-50 font-mono text-blue-600"
                             />
                             <p className="text-sm text-gray-500 mt-1">
-                              This URL is LIVE and ready for your customers
+                              This URL will work automatically for your customers
                             </p>
                           </div>
                         </div>
                         
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                          <h4 className="font-semibold text-green-900 mb-2">✅ Automatic Setup - No Customer Configuration Needed!</h4>
+                          <p className="text-sm text-green-800">
+                            Since <strong>you own</strong> <code className="bg-green-100 px-1 rounded">nubarber.com</code>, <strong>every new barbershop automatically gets their own subdomain</strong> when they sign up. 
+                            Your customers (barbers) don't need to buy domains or configure DNS - it's all automatic!
+                          </p>
+                        </div>
 
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <h4 className="font-semibold text-blue-900 mb-2">How It Works:</h4>
+                          <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                            <li><strong>Platform Owner (You):</strong> Own nubarber.com ✅</li>
+                            <li><strong>One-Time Setup:</strong> Configure DNS for nubarber.com to point to Vercel</li>
+                            <li><strong>Automatic Subdomains:</strong> Every barbershop gets their URL instantly when they sign up</li>
+                            <li><strong>No Customer Setup:</strong> Barbers don't need to configure anything - it's automatic!</li>
+                            <li><strong>Examples:</strong> harrysbarbers.nubarber.com, johnsbarber.nubarber.com</li>
+                          </ol>
+                        </div>
 
                         <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                           <div>
-                            <p className="font-medium">Current URL (temporary):</p>
+                            <p className="font-medium">Your Professional URL:</p>
                             <p className="text-sm text-gray-600 break-all">
                               {typeof window !== 'undefined' ? window.location.origin : ''}/public/{businessName ? DomainService.generateBusinessSlug(businessName) : 'your-business'}
                             </p>
@@ -307,7 +324,7 @@ export default function PublicSitePage() {
 
                         <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
                           <div>
-                            <p className="font-medium">Future Professional URL:</p>
+                            <p className="font-medium">Your Professional URL:</p>
                             <p className="text-sm text-blue-600 break-all font-mono">
                               {businessName ? DomainService.getDefaultSubdomainUrl(DomainService.generateBusinessSlug(businessName)) : 'https://yourbusiness.nubarber.com'}
                             </p>
