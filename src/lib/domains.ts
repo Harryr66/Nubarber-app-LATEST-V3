@@ -45,7 +45,7 @@ export class DomainService {
    */
   static getCurrentUrl(businessSlug: string): string {
     // This should be replaced with your actual Vercel domain
-    return `https://your-vercel-domain.vercel.app/public/${businessSlug}`;
+    return `https://nubarber.com/public/${businessSlug}`;
   }
 
   /**
