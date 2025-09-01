@@ -183,7 +183,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         )}
 
         <SidebarInset>
-          <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6 md:justify-end">
+          <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-2 sm:gap-4 border-b bg-background px-2 sm:px-4 md:static md:h-auto md:border-0 md:bg-transparent md:px-6 md:justify-end">
             <div className="flex items-center gap-4">
               <SidebarTrigger className="md:hidden">
                 <Button
@@ -202,7 +202,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               {/* Desktop header content can go here if needed */}
             </div>
           </header>
-          <main className="flex-1 p-4 md:p-6">
+          <main className="flex-1 p-2 sm:p-4 md:p-6">
             <div className="max-w-7xl mx-auto">
               {children}
             </div>

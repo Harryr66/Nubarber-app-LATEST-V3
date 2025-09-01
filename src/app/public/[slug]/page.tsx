@@ -437,12 +437,12 @@ export default function PublicPage({ params }: PublicPageProps) {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <header className="bg-white border-b-2 border-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-4 space-y-3 sm:space-y-0">
             {/* Logo and Business Name */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               {logoUrl && (
-                <div className="w-12 h-12 relative">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 relative">
                   <Image
                     src={logoUrl}
                     alt={`${businessName} logo`}
@@ -452,17 +452,17 @@ export default function PublicPage({ params }: PublicPageProps) {
                 </div>
               )}
               <div>
-                <h1 className="text-2xl font-bold text-black">{businessName}</h1>
-                <p className="text-sm text-gray-600">Professional Barber Services</p>
+                <h1 className="text-lg sm:text-2xl font-bold text-black">{businessName}</h1>
+                <p className="text-xs sm:text-sm text-gray-600">Professional Barber Services</p>
               </div>
             </div>
 
             {/* Customer Sign In */}
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
               {!isCustomerLoggedIn ? (
                 <button
                   onClick={() => setShowCustomerAuth(true)}
-                  className="px-4 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-colors font-medium"
+                  className="w-full sm:w-auto px-3 sm:px-4 py-2 border-2 border-black text-black rounded-lg hover:bg-black hover:text-white transition-colors font-medium text-sm sm:text-base"
                 >
                   Customer Sign In
                 </button>
@@ -489,32 +489,32 @@ export default function PublicPage({ params }: PublicPageProps) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-8">
+      <main className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
+        <div className="grid lg:grid-cols-2 gap-4 sm:gap-8">
           {/* Left Column - Services */}
-          <div className="space-y-6">
-            <div className="bg-white border-2 border-black rounded-lg p-6 shadow-lg">
-              <h3 className="text-2xl font-bold text-black mb-6">Our Services</h3>
-              <div className="space-y-4">
+          <div className="space-y-4 sm:space-y-6">
+            <div className="bg-white border-2 border-black rounded-lg p-4 sm:p-6 shadow-lg">
+              <h3 className="text-xl sm:text-2xl font-bold text-black mb-4 sm:mb-6">Our Services</h3>
+              <div className="space-y-3 sm:space-y-4">
                 {businessData.services.map((service) => (
                   <button
                     key={service.id}
                     onClick={() => setSelectedService(service.id)}
-                    className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
+                    className={`w-full text-left p-3 sm:p-4 rounded-lg border-2 transition-all duration-200 ${
                       selectedService === service.id
                         ? 'border-black bg-black text-white'
                         : 'border-black bg-white text-black hover:bg-gray-50'
                     }`}
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-bold text-lg">{service.name}</h4>
-                      <span className="text-2xl font-bold">${service.price}</span>
+                      <h4 className="font-bold text-base sm:text-lg">{service.name}</h4>
+                      <span className="text-xl sm:text-2xl font-bold">${service.price}</span>
                     </div>
-                    <p className={`mb-2 ${selectedService === service.id ? 'text-gray-300' : 'text-gray-600'}`}>
+                    <p className={`mb-2 text-sm sm:text-base ${selectedService === service.id ? 'text-gray-300' : 'text-gray-600'}`}>
                       {service.description}
                     </p>
                     <div className="flex justify-between items-center">
-                      <span className={`text-sm ${selectedService === service.id ? 'text-gray-400' : 'text-gray-500'}`}>
+                      <span className={`text-xs sm:text-sm ${selectedService === service.id ? 'text-gray-400' : 'text-gray-500'}`}>
                         {service.duration}
                       </span>
                     </div>
@@ -525,16 +525,16 @@ export default function PublicPage({ params }: PublicPageProps) {
           </div>
 
           {/* Right Column - Integrated Calendar & Booking */}
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {/* Integrated Calendar & Booking Section */}
-            <div className="bg-white border-2 border-black rounded-lg p-6 shadow-lg">
-              <h3 className="text-2xl font-bold text-black mb-4">Book Your Appointment</h3>
-              <p className="text-gray-600 mb-6">Select your barber, date, and time to book</p>
+            <div className="bg-white border-2 border-black rounded-lg p-4 sm:p-6 shadow-lg">
+              <h3 className="text-xl sm:text-2xl font-bold text-black mb-3 sm:mb-4">Book Your Appointment</h3>
+              <p className="text-sm sm:text-base text-gray-600 mb-4 sm:mb-6">Select your barber, date, and time to book</p>
               
               {/* Barber Selection */}
               <div className="mb-6">
                 <Label className="text-sm font-semibold text-black mb-3 block">1. Select Your Barber</Label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
                   {businessData.barbers.map((barber) => (
                     <button
                       key={barber.id}
@@ -573,7 +573,7 @@ export default function PublicPage({ params }: PublicPageProps) {
                   </div>
                   
                   {/* Calendar Legend */}
-                  <div className="grid grid-cols-5 gap-2 mb-4">
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-1 sm:gap-2 mb-4">
                     <div className="flex items-center space-x-2">
                       <div className="w-3 h-3 bg-green-500 rounded"></div>
                       <span className="text-xs text-black">Excellent</span>
@@ -602,7 +602,7 @@ export default function PublicPage({ params }: PublicPageProps) {
               {selectedDate && selectedBarber && availableTimeSlots.length > 0 && (
                 <div className="mb-6">
                   <Label className="text-sm font-semibold text-black mb-3 block">3. Select Time</Label>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                     {availableTimeSlots.map((slot, index) => (
                       <button
                         key={index}
@@ -687,9 +687,9 @@ export default function PublicPage({ params }: PublicPageProps) {
       </main>
 
       {/* Footer with Google Reviews */}
-      <footer className="bg-gray-900 text-white py-12 mt-16">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <footer className="bg-gray-900 text-white py-8 sm:py-12 mt-8 sm:mt-16">
+        <div className="container mx-auto px-2 sm:px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {/* Business Information */}
             <div>
               <h3 className="text-lg font-semibold mb-4">{businessData.name}</h3>

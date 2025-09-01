@@ -51,16 +51,16 @@ export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center">
-          <div className="mr-4 flex items-center">
+        <div className="container flex h-16 items-center px-4">
+          <div className="mr-2 sm:mr-4 flex items-center">
             <Logo />
           </div>
-          <div className="flex flex-1 items-center justify-end space-x-4">
-            <nav className="flex items-center space-x-2">
-              <Button variant="outline" asChild>
+          <div className="flex flex-1 items-center justify-end space-x-2 sm:space-x-4">
+            <nav className="flex items-center space-x-1 sm:space-x-2">
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm" asChild>
                 <Link href="/sign-in">Login</Link>
               </Button>
-              <Button asChild>
+              <Button size="sm" className="text-xs sm:text-sm" asChild>
                 <Link href="/sign-in">Get Started</Link>
               </Button>
             </nav>
@@ -69,13 +69,13 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1">
-        <section className="py-20 md:py-32 lg:py-40">
-          <div className="container text-center">
-            <div className="mx-auto max-w-4xl space-y-6">
-              <h1 className="font-headline text-5xl font-bold sm:text-6xl md:text-7xl">
+        <section className="py-12 sm:py-20 md:py-32 lg:py-40">
+          <div className="container text-center px-4">
+            <div className="mx-auto max-w-4xl space-y-4 sm:space-y-6">
+              <h1 className="font-headline text-3xl sm:text-5xl font-bold md:text-6xl lg:text-7xl">
                 The Ultimate Platform for Modern Barbers
               </h1>
-              <p className="text-lg text-muted-foreground font-sans">
+              <p className="text-base sm:text-lg text-muted-foreground font-sans">
                 Streamline bookings, manage your team, and boost your income — all from one easy-to-use platform. Get your professional website with integrated payments and client management in seconds.
               </p>
               <Button size="lg" asChild>
@@ -87,12 +87,12 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="features" className="py-12 md:py-24 lg:py-32">
-          <div className="container">
-            <div className="mx-auto mb-12 max-w-3xl text-center">
-              <h2 className="text-4xl font-bold sm:text-5xl font-headline text-gray-900">Everything You Need to Succeed</h2>
+        <section id="features" className="py-8 sm:py-12 md:py-24 lg:py-32">
+          <div className="container px-4">
+            <div className="mx-auto mb-8 sm:mb-12 max-w-3xl text-center">
+              <h2 className="text-2xl sm:text-4xl font-bold md:text-5xl font-headline text-gray-900">Everything You Need to Succeed</h2>
             </div>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
               {features.map((feature) => (
                 <Card key={feature.title} className="text-center shadow-lg">
                   <CardHeader>
@@ -112,8 +112,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="pricing" className="py-12 md:py-24 lg:py-32">
-            <div className="container">
+                <section id="pricing" className="py-8 sm:py-12 md:py-24 lg:py-32">
+          <div className="container px-4">
                 <div className="mx-auto mb-12 max-w-3xl text-center">
                     <h2 className="font-headline text-4xl font-bold sm:text-5xl text-gray-900">Simple, Transparent Pricing</h2>
                 </div>
