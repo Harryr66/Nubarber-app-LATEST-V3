@@ -9,7 +9,7 @@ export interface CustomDomain {
 
 export const DOMAIN_CONFIG = {
   // Main domain that YOU already own - no customer purchases needed
-  mainDomain: 'www.nubarber.com',
+  mainDomain: 'nubarber.com',
   // Reserved subdomains that can't be used by customers
   reservedSubdomains: ['www', 'api', 'admin', 'app', 'dashboard', 'auth', 'login', 'signup'],
   // Minimum length for business slugs
@@ -45,7 +45,7 @@ export class DomainService {
    */
   static getCurrentUrl(businessSlug: string): string {
     // This should be replaced with your actual Vercel domain
-    return `https://www.nubarber.com/public/${businessSlug}`;
+    return `https://nubarber.com/public/${businessSlug}`;
   }
 
   /**
