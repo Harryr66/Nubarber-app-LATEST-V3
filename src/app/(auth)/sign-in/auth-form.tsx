@@ -22,7 +22,7 @@ export function AuthForm() {
   const [loading, setLoading] = useState(false);
   const [forgotPasswordMode, setForgotPasswordMode] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
-  const [legalAccepted, setLegalAccepted] = useState(false);
+  // Removed legal consent checkbox - not required
   const { toast } = useToast();
   const router = useRouter();
 
@@ -32,15 +32,7 @@ export function AuthForm() {
 
     try {
       if (isSignUp) {
-        // Ensure legal consents
-        if (!legalAccepted) {
-          toast({
-            title: "Consent required",
-            description: "Please accept the Terms of Service and Privacy Policy to continue.",
-            variant: "destructive",
-          });
-          return;
-        }
+        // Legal consent removed - not required
 
         // Handle sign up (use Firebase-backed endpoint)
         const response = await fetch("/api/auth/firebase-signup", {
@@ -70,7 +62,6 @@ export function AuthForm() {
           setPassword("");
           setShopName("");
           setCountry("");
-          setLegalAccepted(false);
         } else {
           const error = await response.json();
           toast({
@@ -171,7 +162,6 @@ export function AuthForm() {
     setPassword("");
     setShopName("");
     setCountry("");
-    setLegalAccepted(false);
   };
 
   if (forgotPasswordMode) {
@@ -391,35 +381,26 @@ export function AuthForm() {
                 </div>
               </div>
 
-              {/* Terms and Privacy Checkbox */}
-              <div className="space-y-3">
-                <div className="flex items-start space-x-2">
-                  <Checkbox
-                    id="legal-accept"
-                    checked={legalAccepted}
-                    onCheckedChange={(v) => setLegalAccepted(Boolean(v))}
-                  />
-                  <label htmlFor="legal-accept" className="text-sm text-gray-700">
-                    I agree to the{' '}
-                    <a
-                      href="/terms-of-service"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      Terms of Service
-                    </a>
-                    {' '}and{' '}
-                    <a
-                      href="/privacy-policy"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 underline"
-                    >
-                      Privacy Policy
-                    </a>
-                  </label>
-                </div>
+              {/* Legal links - no checkbox required */}
+              <div className="text-xs text-gray-500 text-center">
+                By creating an account, you agree to our{' '}
+                <a
+                  href="/terms-of-service"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  Terms of Service
+                </a>
+                {' '}and{' '}
+                <a
+                  href="/privacy-policy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 underline"
+                >
+                  Privacy Policy
+                </a>
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
