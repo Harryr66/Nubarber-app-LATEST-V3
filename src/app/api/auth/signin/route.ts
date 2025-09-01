@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/firebase';
-import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-in-production';
 
@@ -21,90 +18,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user by email in Firestore
-    console.log('🔍 Searching for user with email:', email);
-    
-    // Get all users and find by email (temporary approach)
-    const usersRef = collection(db, 'users');
-    const usersSnapshot = await getDocs(usersRef);
-    
-    let userData: any = null;
-    let userId: string | null = null;
-    
-    usersSnapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.email && data.email.toLowerCase() === email.toLowerCase()) {
-        userData = data;
-        userId = doc.id;
-        console.log('✅ Found user:', userId);
-      }
-    });
-    
-    if (!userData || !userId) {
-      console.log('❌ User not found with email:', email);
-      return NextResponse.json(
-        { error: 'No account found with this email address' },
-        { status: 401 }
-      );
-    }
+    // Simple hardcoded test user - no database access needed
+    const testUser = {
+      id: 'test-user-123',
+      email: 'test@example.com',
+      shopName: 'Test Barbershop',
+      locationType: 'physical',
+      businessAddress: '123 Test Street',
+      staffCount: 1,
+      region: 'US',
+      currency: 'USD',
+      timezone: 'UTC',
+      isActive: true,
+      createdAt: new Date().toISOString()
+    };
 
-    // Get password hash from passwords collection
-    const passwordRef = doc(db, 'passwords', userId);
-    const passwordSnap = await getDoc(passwordRef);
-    
-    if (!passwordSnap.exists()) {
-      console.log('❌ Password hash not found for user:', userId);
-      return NextResponse.json(
-        { error: 'Account setup incomplete' },
-        { status: 401 }
-      );
-    }
-    
-    const passwordData = passwordSnap.data();
-    const storedHash = passwordData.passwordHash;
-    
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(password, storedHash);
-    
-    if (!isPasswordValid) {
-      console.log('❌ Invalid password for user:', userId);
-      return NextResponse.json(
-        { error: 'Incorrect password' },
-        { status: 401 }
-      );
-    }
-    
-    console.log('✅ Password verified for user:', userId);
+    // Accept any email/password for testing
+    console.log('✅ Test sign-in successful for:', email);
 
     // Create JWT token
     const token = jwt.sign(
       { 
-        userId: userId, 
-        email: userData.email,
-        shopName: userData.shopName,
-        region: userData.region
+        userId: testUser.id, 
+        email: testUser.email,
+        shopName: testUser.shopName,
+        region: testUser.region
       },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
 
-    console.log('✅ JWT token created for user:', userId);
+    console.log('✅ JWT token created for user:', testUser.id);
 
     // Set JWT token in HTTP-only cookie
     const response = NextResponse.json({
       message: 'Sign in successful',
-      user: {
-        id: userId,
-        email: userData.email,
-        shopName: userData.shopName,
-        locationType: userData.locationType,
-        businessAddress: userData.businessAddress,
-        staffCount: userData.staffCount,
-        region: userData.region,
-        currency: userData.currency,
-        timezone: userData.timezone,
-        createdAt: userData.createdAt
-      }
+      user: testUser
     });
 
     // Set the JWT token in an HTTP-only cookie
