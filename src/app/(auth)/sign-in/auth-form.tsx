@@ -55,13 +55,10 @@ export function AuthForm() {
         if (response.ok) {
           toast({
             title: "Account created successfully!",
-            description: "Please sign in with your new account.",
+            description: "Welcome to NuBarber!",
           });
-          setIsSignUp(false);
-          setEmail("");
-          setPassword("");
-          setShopName("");
-          setCountry("");
+          // Automatically sign in the user after account creation
+          router.push("/dashboard");
         } else {
           const error = await response.json();
           toast({
