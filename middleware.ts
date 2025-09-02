@@ -4,16 +4,16 @@ export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const url = request.nextUrl.clone();
   
-  console.log('🔍 Middleware triggered for:', hostname, url.pathname);
+  console.log('🔍 Middleware triggered for hostname:', hostname, 'pathname:', url.pathname);
   
   // Skip API routes and static files
-  if (url.pathname.startsWith('/api') || url.pathname.startsWith('/_next')) {
+  if (url.pathname.startsWith('/api') || url.pathname.startsWith('/_next') || url.pathname.startsWith('/favicon.ico')) {
     console.log('⏭️ Skipping API/static route');
     return NextResponse.next();
   }
   
   // Handle dynamic subdomains for barbershops
-  if (hostname.includes('.nubarber.com')) {
+  if (hostname.includes('.nubarber.com') && !hostname.startsWith('www.')) {
     const subdomain = hostname.split('.')[0];
     console.log('🏪 Subdomain detected:', subdomain);
     

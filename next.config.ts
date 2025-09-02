@@ -18,6 +18,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async rewrites() {
+    return [
+      {
+        source: '/:businessSlug',
+        destination: '/public/:businessSlug',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
