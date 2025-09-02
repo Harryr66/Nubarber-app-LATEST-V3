@@ -18,22 +18,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-
-  // Dynamic subdomain configuration for barbershops
-  async rewrites() {
-    return [
-      // Handle direct access to /public/[slug] (current structure)
-      {
-        source: '/public/:businessSlug',
-        destination: '/public/[businessSlug]',
-      },
-      // Handle clean URLs like /[businessSlug] (for future use)
-      {
-        source: '/:businessSlug',
-        destination: '/public/:businessSlug',
-      },
-    ];
-  },
 };
 
 export default nextConfig;

@@ -4,48 +4,35 @@ export function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || '';
   const url = request.nextUrl.clone();
   
+  console.log('🔍 Middleware triggered for:', hostname, url.pathname);
+  
   // Skip API routes and static files
   if (url.pathname.startsWith('/api') || url.pathname.startsWith('/_next')) {
+    console.log('⏭️ Skipping API/static route');
     return NextResponse.next();
   }
   
   // Handle dynamic subdomains for barbershops
-  // This will catch ANY subdomain like: benisbarbers.nubarber.com, johnsbarber.nubarber.com, etc.
   if (hostname.includes('.nubarber.com')) {
     const subdomain = hostname.split('.')[0];
+    console.log('🏪 Subdomain detected:', subdomain);
     
     // Skip reserved subdomains
-    if (['www', 'api', 'admin', 'app', 'dashboard', 'auth'].includes(subdomain)) {
+    if (['www', 'api', 'admin', 'app', 'dashboard', 'auth', 'login', 'signup'].includes(subdomain)) {
+      console.log('🚫 Reserved subdomain, skipping');
       return NextResponse.next();
     }
     
-    // Check if this is a valid business slug (you can add validation here)
+    // Check if this is a valid business slug
     if (subdomain && subdomain.length > 2) {
+      console.log('✅ Rewriting to:', `/public/${subdomain}`);
       // Rewrite to the public page with the business slug
       url.pathname = `/public/${subdomain}`;
       return NextResponse.rewrite(url);
     }
   }
   
-  // Handle other potential domains (for future expansion)
-  if (hostname.includes('.com') || hostname.includes('.co.uk') || hostname.includes('.com.au')) {
-    const parts = hostname.split('.');
-    if (parts.length >= 3) {
-      const subdomain = parts[0];
-      
-      // Skip common subdomains
-      if (['www', 'api', 'admin', 'app', 'dashboard', 'auth'].includes(subdomain)) {
-        return NextResponse.next();
-      }
-      
-      // Only handle if it's a barbershop-related domain
-      if (hostname.includes('barber') || hostname.includes('salon') || hostname.includes('hair')) {
-        url.pathname = `/public/${subdomain}`;
-        return NextResponse.rewrite(url);
-      }
-    }
-  }
-  
+  console.log('➡️ No rewrite needed, continuing');
   return NextResponse.next();
 }
 
@@ -60,4 +47,4 @@ export const config = {
      */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
-}; 
+};
