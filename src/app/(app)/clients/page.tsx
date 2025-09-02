@@ -147,8 +147,8 @@ export default function ClientsPage() {
     <div className="p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">Clients</h1>
-        <p className="text-gray-300">Manage your customer relationships and view booking history</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Clients</h1>
+        <p className="text-gray-600">Manage your customer relationships and view booking history</p>
       </div>
 
       {/* Stats Cards */}
@@ -207,7 +207,7 @@ export default function ClientsPage() {
       {/* Search and Filters */}
       <div className="mb-6">
         <div className="relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-300 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-4 h-4" />
           <Input
             type="text"
             placeholder="Search clients by email..."
@@ -376,8 +376,8 @@ export default function ClientsPage() {
       {!loading && filteredCustomers.length === 0 && (
         <div className="text-center py-12">
           <Users className="w-16 h-16 mx-auto mb-4 text-gray-300" />
-          <h3 className="text-lg font-medium text-white mb-2">No clients found</h3>
-          <p className="text-gray-300">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No clients found</h3>
+          <p className="text-gray-600">
             {searchTerm ? "Try adjusting your search terms" : "Clients will appear here once they create accounts"}
           </p>
         </div>
