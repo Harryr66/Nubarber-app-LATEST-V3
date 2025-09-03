@@ -15,7 +15,6 @@ interface StaffMember {
   id: string;
   name: string;
   email: string;
-  phone: string;
   specialties: string[];
 }
 
@@ -23,7 +22,7 @@ interface Service {
   id: string;
   name: string;
   duration: number;
-  price: number;
+  price: string;
   description: string;
 }
 
@@ -61,7 +60,6 @@ export function MultiStepSignup() {
   const [staffMembers, setStaffMembers] = useState<StaffMember[]>([]);
   const [newStaffName, setNewStaffName] = useState("");
   const [newStaffEmail, setNewStaffEmail] = useState("");
-  const [newStaffPhone, setNewStaffPhone] = useState("");
 
   // Step 3: Schedule
   const [defaultSchedule, setDefaultSchedule] = useState<Schedule[]>([
@@ -78,24 +76,22 @@ export function MultiStepSignup() {
   const [services, setServices] = useState<Service[]>([]);
   const [newServiceName, setNewServiceName] = useState("");
   const [newServiceDuration, setNewServiceDuration] = useState(30);
-  const [newServicePrice, setNewServicePrice] = useState(0);
+  const [newServicePrice, setNewServicePrice] = useState("");
   const [newServiceDescription, setNewServiceDescription] = useState("");
 
   const totalSteps = 4;
 
   const addStaffMember = () => {
-    if (newStaffName.trim()) {
+    if (newStaffName.trim() && newStaffEmail.trim()) {
       const newStaff: StaffMember = {
         id: Date.now().toString(),
         name: newStaffName,
         email: newStaffEmail,
-        phone: newStaffPhone,
         specialties: []
       };
       setStaffMembers([...staffMembers, newStaff]);
       setNewStaffName("");
       setNewStaffEmail("");
-      setNewStaffPhone("");
     }
   };
 
@@ -115,7 +111,7 @@ export function MultiStepSignup() {
       setServices([...services, newService]);
       setNewServiceName("");
       setNewServiceDuration(30);
-      setNewServicePrice(0);
+      setNewServicePrice("");
       setNewServiceDescription("");
     }
   };
@@ -273,7 +269,7 @@ export function MultiStepSignup() {
             </div>
             
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="staffName">Name</Label>
                   <Input
@@ -291,15 +287,6 @@ export function MultiStepSignup() {
                     value={newStaffEmail}
                     onChange={(e) => setNewStaffEmail(e.target.value)}
                     placeholder="staff@email.com"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="staffPhone">Phone</Label>
-                  <Input
-                    id="staffPhone"
-                    value={newStaffPhone}
-                    onChange={(e) => setNewStaffPhone(e.target.value)}
-                    placeholder="Phone number"
                   />
                 </div>
               </div>
@@ -443,15 +430,13 @@ export function MultiStepSignup() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="servicePrice">Price ($)</Label>
+                  <Label htmlFor="servicePrice">Price</Label>
                   <Input
                     id="servicePrice"
-                    type="number"
+                    type="text"
                     value={newServicePrice}
-                    onChange={(e) => setNewServicePrice(parseFloat(e.target.value) || 0)}
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
+                    onChange={(e) => setNewServicePrice(e.target.value)}
+                    placeholder="e.g., $25, $30.00, Free"
                   />
                 </div>
                 <div>
@@ -478,7 +463,7 @@ export function MultiStepSignup() {
                       <div>
                         <p className="font-medium">{service.name}</p>
                         <p className="text-sm text-gray-600">
-                          {service.duration} min • ${service.price}
+                          {service.duration} min • {service.price}
                         </p>
                         {service.description && (
                           <p className="text-sm text-gray-500">{service.description}</p>
@@ -541,13 +526,15 @@ export function MultiStepSignup() {
           </Button>
           
           <div className="flex space-x-2">
-            <Button
-              onClick={handleSkip}
-              variant="ghost"
-              disabled={loading}
-            >
-              Skip
-            </Button>
+            {currentStep > 1 && (
+              <Button
+                onClick={handleSkip}
+                variant="ghost"
+                disabled={loading}
+              >
+                Skip
+              </Button>
+            )}
             
             {currentStep === totalSteps ? (
               <Button
